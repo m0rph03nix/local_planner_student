@@ -6,7 +6,7 @@ Pour piloter le robot, 2 services (au choix):
 - un Goal sur /move_to/singleGoal
 - un Path sur /move_to/pathGoal
 
-Pour évaluer le déplacement, 2 topic en écoute:
+Pour évaluer le déplacement, 2 topics en écoute:
 - /scan pour vérifier qu'il n'y ai pas d'obstacle
 - /odom pour connaitre la position relative du robot par rapport à la tf odom
 
