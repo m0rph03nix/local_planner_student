@@ -3,8 +3,8 @@
 Le but de ce TP est coder un local planner sur la base de ce template.
 
 Pour piloter le robot, 2 services (au choix):
-- un Goal
-- un Path
+- un Goal sur /move_to/singleGoal
+- un Path sur /move_to/pathGoal
 
 Pour évaluer le déplacement, 2 topic en écoute:
 - /scan pour vérifier qu'il n'y ai pas d'obstacle
