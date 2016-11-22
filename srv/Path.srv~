@@ -1,0 +1,3 @@
+nav_msgs/Path pathToGoal
+---
+std_msgs/Bool success

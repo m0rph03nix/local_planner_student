@@ -1,0 +1,3 @@
+geometry_msgs/Pose2D goalPose2D
+---
+std_msgs/Bool possible
