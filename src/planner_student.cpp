@@ -35,23 +35,43 @@ const float linSat = 2.0; // linear speed saturation
 const float angSat = M_PI / 2.0; // angular speed saturation
 
 vector<PoseStamped> pathPoses;
-vector<PoseStamped>::reverse_iterator currentTarget;
 
 
-
+/*---------------------------------------------------------------------
+Gives the shortest angle between 2 angles in the trigonometric circle
+---------------------------------------------------------------------*/
 float shortestAngleDiff(float th1, float th2)
 {
 	float anglediff;
 
-	// TODO :
-	// - return shortest angle to turn to point to reach
+	// Method 1
+	anglediff = fmod( (th1 - th2) + M_PI, 2*M_PI) - M_PI ;
+	
+
+	// Method 2
+	/*
+	anglediff = fmod( (th1 - th2) , 2*M_PI);
+
+	if( anglediff < 0.0 ) {
+		if( fabs(anglediff) > (2*M_PI + anglediff) ) {
+			anglediff = 2*M_PI + anglediff;
+		}
+	} else {
+		if( anglediff > fabs(anglediff - 2*M_PI) ) {
+			anglediff = anglediff - 2*M_PI;
+		}
+	}*/
 
 	return anglediff;
 }
 
 
-
-void addPose2DToPath(Pose2D p )
+/*---------------------------------------------------------------------
+FUNC
+Add a pose p (type Pose2D) in the Path to follow
+Argument clear (type Bool) clear the existing Path when set to true
+---------------------------------------------------------------------*/
+void addPose2DToPath(Pose2D p, Bool clear )
 {
 	geometry_msgs::PoseStamped ps;
 	tf::Quaternion q = tf::createQuaternionFromRPY(0.0, 0.0, p.theta);
@@ -64,34 +84,79 @@ void addPose2DToPath(Pose2D p )
 	ps.pose.orientation.y = q.y();
 	ps.pose.orientation.z = q.z();
     ps.pose.orientation.w = q.w();
-	pathPoses.clear();
+	if(clear) pathPoses.clear();
     pathPoses.push_back(ps);
 
 }
 
 
+/*---------------------------------------------------------------------
+SERVICE
+Clear the previous Path 
+Add the only one Pose received by the client to the Path 
+---------------------------------------------------------------------*/
 bool goalService(local_planner_student::localGoal::Request& request, local_planner_student::localGoal::Response& response)
 {
-	// TODO :
-	// - clear pathPoses
-	// - if no obstacle (isObstacle = false), create a new path (pathPoses) with just one Pose
+	response.possible.data = isObstacle?false:true;
+
+	if(!isObstacle) {
+		addPose2DToPath(request.goalPose2D, true);
+		ROS_INFO("Goal to x = %.2f    y = %.2f",request.goalPose2D.x, request.goalPose2D.y );
+ 	}
 		
-	return true;
+	return (!isObstacle);
 }
 
-bool pathService(local_planner_student::Path::Request& request, local_planner_student::Path::Response& response)
+/*---------------------------------------------------------------------
+SERVICE
+Clear the previous Path 
+Add the Path received by the client to the Path with a TF transform between the frame_id
+---------------------------------------------------------------------*/
+bool pathService(local_planner_raph::Path::Request& request, local_planner_raph::Path::Response& response)
 {
-	// TODO :
-	// - Get transform frame_id to "/odom"
-	// - clear pathPoses
-	// - Copy request path to pathPoses with transform difference
+	tf::TransformListener listener;
+	tf::StampedTransform transform;
+
+
+    try{
+
+    	ros::Time now = ros::Time(0);
+
+    	listener.waitForTransform(request.pathToGoal.header.frame_id, "/odom", now, ros::Duration(2.0));
+
+      	listener.lookupTransform(request.pathToGoal.header.frame_id, "/odom", now, transform);
+
+		ROS_INFO("Tranform from %s to /odom is x = %.2f    y = %.2f",request.pathToGoal.header.frame_id.c_str(), transform.getOrigin().x(), transform.getOrigin().y() );
+    }
+    catch (tf::TransformException ex){
+      ROS_ERROR("%s",ex.what());
+      //ros::Duration(1.0).sleep();
+    }
+
+	for(int i=0; i<request.pathToGoal.poses.size(); i++) {
+		request.pathToGoal.poses.at(i).pose.position.x ; // TODO : Apply here the transform in x
+		request.pathToGoal.poses.at(i).pose.position.y ; // TODO : Apply here the transform in y
+		ROS_INFO("# Pose %d : x = %.2f   y = %.2f", i, request.pathToGoal.poses.at(i).pose.position.x, request.pathToGoal.poses.at(i).pose.position.y );
+	}
+
+	//ROS_INFO("### New path with %d poses", (int)request.pathToGoal.poses.size() );	
+
+	pathPoses.clear();
+    pathPoses.reserve(request.pathToGoal.poses.size());
+    copy(request.pathToGoal.poses.rbegin(),request.pathToGoal.poses.rend(),back_inserter(pathPoses));
+
+	ROS_INFO("### New path with %d poses", (int)pathPoses.size() );	
 
 	response.success.data = true;
 
 	return true;
 }
 
-
+/*---------------------------------------------------------------------
+CALLBACK
+odometry callback
+Set curPose2D with current robot x y theta
+---------------------------------------------------------------------*/
 void odomCallback(const nav_msgs::Odometry odom)
 {
 	tf::Quaternion q(	odom.pose.pose.orientation.x, 
@@ -110,7 +175,11 @@ void odomCallback(const nav_msgs::Odometry odom)
 
 }
 
-
+/*---------------------------------------------------------------------
+CALLBACK
+laser scan callback
+Detect (set isObstacle = true) and log if obstacle
+---------------------------------------------------------------------*/
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
 {
 	short scan_size = ((scan->angle_max - scan->angle_min) / scan->angle_increment);
@@ -159,6 +228,10 @@ int main(int argc, char **argv)
 		// - for each pose in pathPoses, turn until angle error > 0.02rad, then continue to turn and move forward in the same time until reaching point (with 0.02m error)
 		// - use function shortestAngleDiff
 		// Note: Current robot pose is in curPose2D
+
+		// Suggestion : 
+		// - To pop your vector use if(pathPoses.size() > 1) pathPoses.pop_back();
+		// - To use the current pose in Path use pathPoses.back().pose.
 
 
 		velocity_pub.publish(twist);
