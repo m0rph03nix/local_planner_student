@@ -69,9 +69,9 @@ float shortestAngleDiff(float th1, float th2)
 /*---------------------------------------------------------------------
 FUNC
 Add a pose p (type Pose2D) in the Path to follow
-Argument clear (type Bool) clear the existing Path when set to true
+Argument clear (type bool) clear the existing Path when set to true
 ---------------------------------------------------------------------*/
-void addPose2DToPath(Pose2D p, Bool clear )
+void addPose2DToPath(Pose2D p, bool clear )
 {
 	geometry_msgs::PoseStamped ps;
 	tf::Quaternion q = tf::createQuaternionFromRPY(0.0, 0.0, p.theta);
@@ -112,7 +112,7 @@ SERVICE
 Clear the previous Path 
 Add the Path received by the client to the Path with a TF transform between the frame_id
 ---------------------------------------------------------------------*/
-bool pathService(local_planner_raph::Path::Request& request, local_planner_raph::Path::Response& response)
+bool pathService(local_planner_student::Path::Request& request, local_planner_student::Path::Response& response)
 {
 	tf::TransformListener listener;
 	tf::StampedTransform transform;
