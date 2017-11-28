@@ -28,5 +28,5 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud s'abonner a
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 - /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
 
-Complétez le template. Des commentaires "TODO" indique dans les grandes lignes ce qu'il faut faire.
-Commencez par déplacer le robot pour 1 seul Target ajoutez la fonctionnalité du Path
+**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "TODO" indique dans les grandes lignes ce qu'il faut faire.
+Commencez par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal  , ajoutez la fonctionnalité du Path. **
