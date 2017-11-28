@@ -1,6 +1,11 @@
 # local_planner_student
 
-Le but de ce TP est de coder un local planner sur la base de ce template.
+Le but de ce TP est de coder un local planner sur la base du template fourni.
+
+Ce local planner fonctionne (une fois complété) avec un robot fournissant les topics **/odom** et **/scann** et se déplaceant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
+```{r, engine='bash', count_lines} 
+roslaunch turtlebot_stage turtlebot_in_stage.launch
+```
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
 + un Goal sur /move_to/singleGoal   
@@ -29,4 +34,4 @@ Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 - /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
 
 **Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "TODO" indique dans les grandes lignes ce qu'il faut faire.
-Commencez par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal  , ajoutez la fonctionnalité du Path. **
+Commencez par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path.**
