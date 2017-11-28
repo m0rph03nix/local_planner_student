@@ -119,12 +119,9 @@ bool pathService(local_planner_student::Path::Request& request, local_planner_st
 
 
 	try{
-
-	ros::Time now = ros::Time(0);
-
-	listener.waitForTransform(request.pathToGoal.header.frame_id, "/odom", now, ros::Duration(2.0));
-
-	listener.lookupTransform(request.pathToGoal.header.frame_id, "/odom", now, transform);
+		ros::Time now = ros::Time(0);
+		listener.waitForTransform(request.pathToGoal.header.frame_id, "/odom", now, ros::Duration(2.0));
+		listener.lookupTransform(request.pathToGoal.header.frame_id, "/odom", now, transform);
 
 		ROS_INFO("Tranform from %s to /odom is x = %.2f    y = %.2f",request.pathToGoal.header.frame_id.c_str(), transform.getOrigin().x(), transform.getOrigin().y() );
 	}
@@ -136,6 +133,7 @@ bool pathService(local_planner_student::Path::Request& request, local_planner_st
 	for(int i=0; i<request.pathToGoal.poses.size(); i++) {
 		request.pathToGoal.poses.at(i).pose.position.x ; // TODO : Apply here the transform in x
 		request.pathToGoal.poses.at(i).pose.position.y ; // TODO : Apply here the transform in y
+		
 		ROS_INFO("# Pose %d : x = %.2f   y = %.2f", i, request.pathToGoal.poses.at(i).pose.position.x, request.pathToGoal.poses.at(i).pose.position.y );
 	}
 
