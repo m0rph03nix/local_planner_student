@@ -75,17 +75,17 @@ void addPose2DToPath(Pose2D p, bool clear )
 {
 	geometry_msgs::PoseStamped ps;
 	tf::Quaternion q = tf::createQuaternionFromRPY(0.0, 0.0, p.theta);
-    ps.header.frame_id = "odom";
-    ps.header.stamp = ros::Time::now();
-    ps.header.seq = 0;
-    ps.pose.position.x = p.x;
-    ps.pose.position.y = p.y;
+	ps.header.frame_id = "odom";
+	ps.header.stamp = ros::Time::now();
+	ps.header.seq = 0;
+	ps.pose.position.x = p.x;
+	ps.pose.position.y = p.y;
 	ps.pose.orientation.x = q.x();
 	ps.pose.orientation.y = q.y();
 	ps.pose.orientation.z = q.z();
-    ps.pose.orientation.w = q.w();
+	ps.pose.orientation.w = q.w();
 	if(clear) pathPoses.clear();
-    pathPoses.push_back(ps);
+	pathPoses.push_back(ps);
 
 }
 
@@ -102,8 +102,8 @@ bool goalService(local_planner_student::localGoal::Request& request, local_plann
 	if(!isObstacle) {
 		addPose2DToPath(request.goalPose2D, true);
 		ROS_INFO("Goal to x = %.2f    y = %.2f",request.goalPose2D.x, request.goalPose2D.y );
- 	}
-		
+	}
+
 	return (!isObstacle);
 }
 
@@ -118,20 +118,20 @@ bool pathService(local_planner_student::Path::Request& request, local_planner_st
 	tf::StampedTransform transform;
 
 
-    try{
+	try{
 
-    	ros::Time now = ros::Time(0);
+	ros::Time now = ros::Time(0);
 
-    	listener.waitForTransform(request.pathToGoal.header.frame_id, "/odom", now, ros::Duration(2.0));
+	listener.waitForTransform(request.pathToGoal.header.frame_id, "/odom", now, ros::Duration(2.0));
 
-      	listener.lookupTransform(request.pathToGoal.header.frame_id, "/odom", now, transform);
+	listener.lookupTransform(request.pathToGoal.header.frame_id, "/odom", now, transform);
 
 		ROS_INFO("Tranform from %s to /odom is x = %.2f    y = %.2f",request.pathToGoal.header.frame_id.c_str(), transform.getOrigin().x(), transform.getOrigin().y() );
-    }
-    catch (tf::TransformException ex){
-      ROS_ERROR("%s",ex.what());
-      //ros::Duration(1.0).sleep();
-    }
+	}
+	catch (tf::TransformException ex){
+		ROS_ERROR("%s",ex.what());
+		//ros::Duration(1.0).sleep();
+	}
 
 	for(int i=0; i<request.pathToGoal.poses.size(); i++) {
 		request.pathToGoal.poses.at(i).pose.position.x ; // TODO : Apply here the transform in x
@@ -142,8 +142,8 @@ bool pathService(local_planner_student::Path::Request& request, local_planner_st
 	//ROS_INFO("### New path with %d poses", (int)request.pathToGoal.poses.size() );	
 
 	pathPoses.clear();
-    pathPoses.reserve(request.pathToGoal.poses.size());
-    copy(request.pathToGoal.poses.rbegin(),request.pathToGoal.poses.rend(),back_inserter(pathPoses));
+	pathPoses.reserve(request.pathToGoal.poses.size());
+	copy(request.pathToGoal.poses.rbegin(),request.pathToGoal.poses.rend(),back_inserter(pathPoses));
 
 	ROS_INFO("### New path with %d poses", (int)pathPoses.size() );	
 
