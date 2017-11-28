@@ -1,16 +1,31 @@
 # local_planner_student
 
-Le but de ce TP est coder un local planner sur la base de ce template.
+Le but de ce TP est de coder un local planner sur la base de ce template.
 
-Pour piloter le robot, 2 services (au choix):
-- un Goal sur /move_to/singleGoal
-- un Path sur /move_to/pathGoal
+Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
++ un Goal sur /move_to/singleGoal   
+  - Ce service recoit un message **goalPose2D** de type **geometry_msgs/Pose2D** et répond le message **possible** de type **std_msgs/Bool** donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
+  - La consigne **goalPose2D** est exprimée en absolue dans le repère de la TF odom
+  - Le plus simple pour appeler ce service est d'utiliser la commande suivante :
+    ```{r, engine='bash', count_lines} 
+    rosservice call /move_to/singleGoal '[0.0, 0.0, 0.0]'
+    ```
++ un Path sur /move_to/pathGoal
+  - Ce service recoit un message **pathToGoal** de type **nav_msgs/Path** et répond le message **success** de type **std_msgs/Bool** renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
+  - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
+      ```{r, engine='bash', count_lines} 
+      rosrun local_planner_student path_generator_student
+      ```
+      Le code source du générateur se trouve dans le fichier [path_generator.cpp](/src/path_generator.cpp)
+  - La consigne **pathToGoal** est exprimée en absolue dans n'importe quel repère à définir dans **header.frame_id** . Dans le cas du générateur, le **frame_id** envoyé est celui de la **/map**. **Attention** : A sa reception, la position devra être convertie dans le repère de la TF odom.
 
-Pour évaluer le déplacement, 2 topics en écoute:
-- /scan pour vérifier qu'il n'y ai pas d'obstacle
-- /odom pour connaitre la position relative du robot par rapport à la tf odom
+Pour évaluer le déplacement et l'environnement proche, votre noeud s'abonner aux 2 topics suivants :
++ /scan pour vérifier qu'il n'y ai pas d'obstacle
+  - Pour faire simple, si un des points du laser a un obstacle à moins de 25cm lors de l'execution d'un service, on considère qu'un obstacle empêche le succès de ce service. On affichera un log avec la distance de l'obstacle ainsi que l'angle de sa detection. 
++ /odom pour connaitre la position relative du robot par rapport à la tf odom
 
-En sortie, un topic en publication:
+
+Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 - /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
 
 Complétez le template. Des commentaires "TODO" indique dans les grandes lignes ce qu'il faut faire.
