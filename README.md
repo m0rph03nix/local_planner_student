@@ -2,7 +2,7 @@
 
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [localPlanner_student.py](/script/localPlanner_student.py)
 
-| ![local_planner.JPG](local_planner.JPG) |
+| ![local_planner.jpg](local_planner.jpg) |
 |:-------:|
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
