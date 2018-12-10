@@ -100,7 +100,7 @@ class LocalPlanner:
     def scanCallback(self, scan):
         """
             laser scan callback
-            Detect (set isObstacle = true) if obstacle
+            Detect (set isObstacle = true) if obstacle. If obstacle detected, log once every 100 call of this function
         """        
         #TODO for students : If an obstacle below self.Obstacle_range if detected, then self.isObstacle = True, False otherwise
 
