@@ -2,7 +2,7 @@
 
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [localPlanner_student.py](/script/localPlanner_student.py)
 
-| ![local_planner.JPG](local_planner.JPG)  *          local_planner_student basic principle          * |
+| ![local_planner.JPG](local_planner.JPG)  *local_planner_student basic principle for a differential drive robot like turtlebot* |
 |:----------:|
 
 Ce "local planner" fonctionne (une fois complété) avec un robot fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
