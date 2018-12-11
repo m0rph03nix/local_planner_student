@@ -7,7 +7,7 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
 
-Ce "local planner" fonctionne (une fois complété) avec un robot fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
+Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
 roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
@@ -39,5 +39,5 @@ Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
   - Merci d'utiliser à cet effet les ROSPARAM **K_LINEAR**, **K_ANGULAR**, **SAT_LINEAR** et **SAT_ANGULAR** passés au contructeur de localPlanner
 
-**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire.
-Commencez par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path.**
+**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
+Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path. Pour finir veillez à l'orientation finale**
