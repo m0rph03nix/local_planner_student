@@ -2,7 +2,7 @@
 
 
 #mermaid-1544545687863 .label {
-  font-family: 'trebuchet ms', verdana, arial;
+  font-family: 'trebuchet ms', verdana, monospaced;
   color: #333; }
 
 #mermaid-1544545687863 .node rect,

@@ -6,23 +6,7 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 |:-------:|
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
-<!---
-sequenceDiagram
-    participant New Goal
-    participant Reach in progress
-    participant Last  position reached
-    participant Last  pose reached
-    New Goal->>Reach in progress: 
-    Reach in progress->>Reach in progress: 
-    Reach in progress->>New Goal:  dist < WAYPOINT_ERROR
-    Reach in progress->>Last  position reached:  dist < DESTINATION_ERROR
-    Last  position reached->>Last  position reached:  
-    Last  position reached->>Last  pose reached:  angle < ANGLE_ERROR
-    Last  pose reached->>Last  pose reached : .
 
--->
-
-![img](img/state_machine.svg)
 
 Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
@@ -55,6 +39,26 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abon
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
   - Merci d'utiliser à cet effet les ROSPARAM **K_LINEAR**, **K_ANGULAR**, **SAT_LINEAR** et **SAT_ANGULAR** passés au contructeur de localPlanner
+
+
+<!---
+sequenceDiagram
+    participant New Goal
+    participant Reach in progress
+    participant Last  position reached
+    participant Last  pose reached
+    New Goal->>Reach in progress: 
+    Reach in progress->>Reach in progress: 
+    Reach in progress->>New Goal:  dist < WAYPOINT_ERROR
+    Reach in progress->>Last  position reached:  dist < DESTINATION_ERROR
+    Last  position reached->>Last  position reached:  
+    Last  position reached->>Last  pose reached:  angle < ANGLE_ERROR
+    Last  pose reached->>Last  pose reached : .
+
+-->
+| ![img](img/state_machine.svg) |
+|:-----------------------------:|
+| Machine d'état permettant de passer d'un waypoint à un autre |
 
 **Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
 Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path. Pour finir veillez à l'orientation finale**
