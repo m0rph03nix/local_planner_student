@@ -1,8 +1,13 @@
 # local_planner_student
 
-Le but de ce TP est de coder un "local planner" sur la base du template fourni.
+Le but de ce TP est de coder un "local planner" sur la base du template fourni : [localPlanner_student.py](/script/localPlanner_student.py)
 
-Ce "local planner" fonctionne (une fois complété) avec un robot fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
+| ![local_planner.jpg](local_planner.jpg) |
+|:-------:|
+| *local_planner_student basic principle for a differential drive robot like turtlebot* |
+
+
+Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
 roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
@@ -21,18 +26,18 @@ Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants 
       ```{r, engine='bash', count_lines} 
       rosrun local_planner_student path_generator_student
       ```
-      Le code source du générateur se trouve dans le fichier [path_generator.cpp](/src/path_generator.cpp)
+      Le code source du générateur se trouve dans le fichier [testPathGenerator.py](/script/testPathGenerator.py)
   - La consigne **pathToGoal** est exprimée en absolue dans n'importe quel repère à définir dans **header.frame_id** . Dans le cas du générateur, le **frame_id** envoyé est celui de la **/map**. **Attention** : A sa reception, la position devra être convertie dans le repère de la TF odom.
 
-Pour évaluer le déplacement et l'environnement proche, votre noeud s'abonner aux 2 topics suivants :
+Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abonner aux 2 topics suivants :
 + /scan pour vérifier qu'il n'y ait pas d'obstacle
-  - Pour faire simple, si un des points du laser a un obstacle à moins de 25cm lors de l'execution d'un service, on considère qu'un obstacle empêche le succès de ce service. On affichera un log avec la distance de l'obstacle ainsi que l'angle de sa detection. 
+  - Pour faire simple, si un des points du laser a un obstacle à moins d'une valeur défini en ROSPARAM lors de l'execution d'un service, on considère qu'un obstacle empêche le succès de ce service. On affichera un log avec la distance de l'obstacle ainsi que l'angle de sa detection, une fois sur 100
 + /odom pour connaitre la position relative du robot par rapport à la tf odom
 
 
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
-  - Merci d'utiliser à cet effet les constantes **Kp**, **Ka**, **linSat** et **angSat** définies au début du code
+  - Merci d'utiliser à cet effet les ROSPARAM **K_LINEAR**, **K_ANGULAR**, **SAT_LINEAR** et **SAT_ANGULAR** passés au contructeur de localPlanner
 
-**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "TODO" indique dans les grandes lignes ce qu'il faut faire.
-Commencez par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path.**
+**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
+Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path. Pour finir veillez à l'orientation finale**
