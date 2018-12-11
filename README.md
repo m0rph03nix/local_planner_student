@@ -8,7 +8,21 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 
 
 
-Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
+Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi** :
+
+<!---
+graph LR
+    T1[Odometry source] -- /odom --TO_REMOVE> Node((local_planner_student))
+    T2[Laser source] -- /scan --TO_REMOVE> Node((local_planner_student))
+
+    S1[ ] -. /move_to/singleGoal .-> Node
+    S2[ ] -. /move_to/pathGoal .-> Node
+
+    Node -- /cmd_vel_mux/input/navi --TO_REMOVE>D[base controller]
+-->
+![img](img/local_archi.svg) 
+
+Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
 roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
@@ -56,9 +70,11 @@ sequenceDiagram
     Last  pose reached->>Last  pose reached : .
 
 -->
-| ![img](img/state_machine.svg) |
-|:-----------------------------:|
-| Machine d'état permettant de passer d'un waypoint à un autre |
+Machine d'état permettant de passer d'un waypoint à un autre :
+
+![img](img/state_machine.svg) 
+ 
+
 
 **Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
 Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path. Pour finir veillez à l'orientation finale**
