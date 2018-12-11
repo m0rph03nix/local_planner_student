@@ -2,17 +2,34 @@
 
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [localPlanner_student.py](/script/localPlanner_student.py)
 
-| ![local_planner.jpg](local_planner.jpg) |
+| ![local_planner.jpg](img/local_planner.jpg) |
 |:-------:|
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
+<!---
+sequenceDiagram
+    participant New Goal
+    participant Reach in progress
+    participant Last  position reached
+    participant Last  pose reached
+    New Goal->>Reach in progress: 
+    Reach in progress->>Reach in progress: 
+    Reach in progress->>New Goal:  dist < WAYPOINT_ERROR
+    Reach in progress->>Last  position reached:  dist < DESTINATION_ERROR
+    Last  position reached->>Last  position reached:  
+    Last  position reached->>Last  pose reached:  angle < ANGLE_ERROR
+    Last  pose reached->>Last  pose reached : .
+
+-->
+
+![img](img/state_machine.svg)
 
 Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi**. Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
 roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
 
-Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
+Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**C'est à vous de le coder !!!**):
 + un Goal sur /move_to/singleGoal   
   - Ce service recoit un message **goalPose2D** de type **geometry_msgs/Pose2D** et répond le message **possible** de type **std_msgs/Bool** donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
   - La consigne **goalPose2D** est exprimée en absolue dans le repère de la TF odom

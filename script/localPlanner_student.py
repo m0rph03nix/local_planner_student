@@ -78,7 +78,7 @@ class LocalPlanner:
         # ------------------#
         # ---- Service -----#
         # ------------------#
-        self.opg_Srv = rospy.Service('goalService', localGoal, self.goalService)
+        self.opg_Srv = rospy.Service('/move_to/singleGoal', localGoal, self.goalService)
         self.opg_Srv = rospy.Service('/move_to/pathGoal', PathToGoal, self.pathService)
         rospy.loginfo("Planner services initialized")
 
@@ -144,7 +144,7 @@ class LocalPlanner:
      
             for i in xrange( len(req.pathToGoal.poses) ) : 
                 req.pathToGoal.poses[i].pose.position.x #TODO for students : Apply tranform in x
-                req.pathToGoal.poses[i].pose.position.y #TODO for students : Apply tranform in x
+                req.pathToGoal.poses[i].pose.position.y #TODO for students : Apply tranform in y
                 rospy.loginfo("# Pose %d : x = %.2f   y = %.2f" % (i, req.pathToGoal.poses[i].pose.position.x, req.pathToGoal.poses[i].pose.position.y) )
 
             del self.pathPoses[:]
