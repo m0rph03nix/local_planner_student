@@ -20,7 +20,7 @@ graph LR
 
     Node -- /cmd_vel_mux/input/navi --TO_REMOVE>D[base controller]
 -->
-![img](https://raw.githubusercontent.com/m0rph03nix/local_planner_student/master/img/local_archi.svg?sanitize=true) 
+![Status: Draft](https://raw.githubusercontent.com/m0rph03nix/local_planner_student/master/img/local_archi.svg) 
 
 Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
