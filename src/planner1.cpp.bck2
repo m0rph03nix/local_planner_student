@@ -1,0 +1,292 @@
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "std_msgs/Bool.h"
+#include "std_srvs/Empty.h"
+#include "sensor_msgs/LaserScan.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/Pose2D.h"
+#include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/Quaternion.h"
+#include "nav_msgs/Odometry.h"
+#include "local_planner_raph/localGoal.h"
+#include "local_planner_raph/Path.h"
+#include <tf/transform_datatypes.h>
+
+#include <sstream>
+#include <iterator>     // std::back_inserter
+#include <vector>       // std::vector
+#include <algorithm>    // std::copy
+
+using std::vector;
+using std::string;
+using std::copy;
+using std::back_inserter;
+using geometry_msgs::Pose2D;
+
+Pose2D iniPose2D;
+Pose2D curPose2D;
+Pose2D goalPose2D;
+bool isObstacle = false;
+double zAngSpeed = 0;
+
+vector<geometry_msgs::PoseStamped> pathPoses;
+
+/* TODO :
+ - finalisation de la méthode actuelle en ajoutant l'orientation finale
+ - nouvelle méthode avec des splines (polynomes 3 ou 5 ??)
+ - service avec waypoints de type nav_msgs/Path.msg
+ - option : Création de paramètre comme la vitesse lin et ang
+ - option : diminution de la vitesse à l'approche d'un obstacle et emission d'un service de blocage après un certain temps
+
+
+*/
+
+
+//bool goalCallback(geometry_msgs::Pose2D &goalPose2D, std_msgs::Bool possible )
+//bool goalCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
+bool goalCallback(local_planner_raph::localGoal::Request& request, local_planner_raph::localGoal::Response& response)
+{
+	response.possible.data = isObstacle?false:true;
+
+	if(!isObstacle) {
+		goalPose2D.x = request.goalPose2D.x;
+		goalPose2D.y = request.goalPose2D.y;
+		goalPose2D.theta = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);//request.goalPose2D.theta;
+ 	}
+		
+	return true;
+}
+
+bool pathCallback(local_planner_raph::Path::Request& request, local_planner_raph::Path::Response& response)
+{
+
+	ROS_INFO("### New path with %d poses", (int)request.pathToGoal.poses.size() );	
+
+    pathPoses.reserve(request.pathToGoal.poses.size());
+    copy(request.pathToGoal.poses.rbegin(),request.pathToGoal.poses.rend(),back_inserter(pathPoses));
+
+	ROS_INFO("### New path with %d poses", (int)pathPoses.size() );	
+
+	response.success.data = true;
+
+	return true;
+}
+
+
+void odomCallback(const nav_msgs::Odometry odom)
+{
+	tf::Quaternion q(	odom.pose.pose.orientation.x, 
+						odom.pose.pose.orientation.y, 
+						odom.pose.pose.orientation.z, 
+						odom.pose.pose.orientation.w);
+
+	tf::Matrix3x3 m(q);
+	double roll, pitch, yaw;
+	m.getRPY(roll, pitch, yaw);
+
+
+	curPose2D.x = odom.pose.pose.position.x;
+	curPose2D.y = odom.pose.pose.position.y;
+	curPose2D.theta = yaw;
+	goalPose2D.theta = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);
+
+	zAngSpeed = odom.twist.twist.angular.z;
+/*
+  	ROS_INFO("odom: [x = %f] [y = %f] [angle = %f]", 	curPose2D.x,
+														curPose2D.y, 
+														curPose2D.theta);
+*/
+}
+
+
+void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan)
+{
+	short scan_size = ((scan->angle_max - scan->angle_min) / scan->angle_increment);
+	int i=0;
+	//ROS_INFO("### scan->angle_min: %f",  scan->angle_min);
+	//ROS_INFO("### scan->angle_max: %f",  scan->angle_max);
+	//ROS_INFO("### scan->angle_increment: %f",  scan->angle_increment);
+
+	isObstacle = false;
+
+	for(i=0; i<scan_size; i++)
+	{
+		if(scan->ranges.at(i) < 0.25) 
+		{	
+			isObstacle = true;
+			ROS_INFO("### OBSTACLE : Distance[%f]   Angle[%f]",  scan->ranges.at(i),  scan->angle_min+(float)i*scan->angle_increment);
+		}
+	}
+
+
+	//ROS_INFO("### DISTANCE: [%f]",  scan->ranges.at(scan_size/2) );
+
+}
+
+int main(int argc, char **argv)
+{
+	
+	ros::init(argc, argv, "planner1");
+
+	ros::NodeHandle n;
+
+	Pose2D nextGoal;
+	//Bool isNextGoal;
+
+	ros::Publisher velocity_pub = n.advertise<geometry_msgs::Twist>("cmd_vel_mux/input/navi", 100);
+	ros::Subscriber sub1 = n.subscribe("odom", 50, odomCallback);
+	ros::Subscriber sub2 = n.subscribe("scan", 100, scanCallback);
+	
+	ros::ServiceServer service_goal = n.advertiseService("/move_to/singleGoal", goalCallback);
+	ros::ServiceServer service_path = n.advertiseService("/move_to/pathGoal", pathCallback);
+
+	goalPose2D.x = 0;
+	goalPose2D.y = 0;
+	goalPose2D.theta = 0;
+
+	ros::Rate loop_rate(30);
+
+	int count = 0;
+
+	if( pathPoses.size() )
+	{
+		goalPose2D.x = pathPoses.at( pathPoses.size()-1 ).pose.position.x;
+		goalPose2D.y = pathPoses.at( pathPoses.size()-1 ).pose.position.y;
+		goalPose2D.theta = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);
+	}
+
+	while (ros::ok())
+	{
+		geometry_msgs::Twist twist;
+		float distance = 0;
+		float angleGoal = 0;
+		float angle = 0;
+		float angleList[4];
+		float angleMin = 0;
+		int indexMin = 0;
+
+		distance = sqrt(pow(goalPose2D.x - curPose2D.x, 2) + pow(goalPose2D.y - curPose2D.y, 2) );
+		angleGoal = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);
+		/*
+		if(angleGoal > 0.0 & curPose2D.theta > 0.0) {
+			if(angleGoal > curPose2D.theta) {
+				angle = angleGoal - curPose2D.theta;
+			} else {
+				angle = -angleGoal + curPose2D.theta;
+			}
+		} else { 
+			if( abs(angleGoal - curPose2D.theta) < abs(angleGoal + curPose2D.theta) {
+				angle = angleGoal - curPose2D.theta ;
+			} else {
+				angle = angleGoal + curPose2D.theta ;
+			}
+		}
+		*/
+
+		angleList[0] = angleGoal - curPose2D.theta;
+		angleList[1] = angleGoal + curPose2D.theta;
+		angleList[2] = -angleGoal - curPose2D.theta;
+		angleList[3] = -angleGoal + curPose2D.theta;
+
+
+		angleMin = angleList[0];
+		indexMin = 0;
+		for(int i=1; i<4; i++) {
+			if( abs(angleMin) > abs(angleList[i]) ) {
+				angleMin = angleList[i];
+				indexMin = i;
+			}
+		}
+
+		angle = angleMin;
+
+
+
+
+		if(distance < 0.02 && angle < 0.02)
+		{	
+			if( pathPoses.size() )
+			{	
+				pathPoses.pop_back();
+				if( pathPoses.size() )
+				{
+					goalPose2D.x = pathPoses.at( pathPoses.size()-1 ).pose.position.x;
+					goalPose2D.y = pathPoses.at( pathPoses.size()-1 ).pose.position.y;
+					goalPose2D.theta = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);
+					
+					distance = sqrt(pow(goalPose2D.x - curPose2D.x, 2) + pow(goalPose2D.y - curPose2D.y, 2) );
+					angleGoal = atan2(goalPose2D.y - curPose2D.y , goalPose2D.x - curPose2D.x);
+					/*
+					if       (angleGoal < 0.0 & curPose2D.theta < 0.0) {
+						angle = angleGoal - curPose2D.theta;
+					} else if(angleGoal > 0.0 & curPose2D.theta < 0.0) {
+						angle = angleGoal - curPose2D.theta;
+					} else if(angleGoal < 0.0 & curPose2D.theta > 0.0) {
+						angle = angleGoal - curPose2D.theta;
+					} else if(angleGoal > 0.0 & curPose2D.theta > 0.0) {
+						if(angleGoal > curPose2D.theta) {
+							angle = angleGoal + curPose2D.theta;
+						} else {
+							angle = -angleGoal + curPose2D.theta;
+						}
+					} 
+					*/
+		angleList[0] = angleGoal - curPose2D.theta;
+		angleList[1] = angleGoal + curPose2D.theta;
+		angleList[2] = -angleGoal - curPose2D.theta;
+		angleList[3] = -angleGoal + curPose2D.theta;
+
+
+		angleMin = angleList[0];
+		indexMin = 0;
+		for(int i=1; i<4; i++) {
+			if( abs(angleMin) > abs(angleList[i]) ) {
+				angleMin = angleList[i];
+				indexMin = i;
+			}
+		}
+
+		angle = angleMin;
+
+
+
+				}
+			}			
+		}
+
+		//if(angle < -2*M_PI) angle = fmod(angle, 2*M_PI);
+		//if(angle > 2*M_PI) angle = fmod(angle, 2*M_PI);
+
+		//if(angle > M_PI) angle = M_PI - fmod(angle, M_PI);
+		//if(angle < -M_PI) angle = M_PI + fmod(angle, M_PI);
+
+		ROS_INFO("### Pose2d: X=[%.1f] %.1f    Y=[%.1f] %.1f    theta=[%.1f] %.1f  ---  dist=%.2f  angle=%.2f", goalPose2D.x, curPose2D.x, goalPose2D.y, curPose2D.y, goalPose2D.theta, curPose2D.theta, distance, angle);
+
+
+		
+		if( abs(angle) > 0.02) {
+			twist.angular.z = angle * 0.8;
+			twist.linear.x = 0;
+		} else {
+			twist.angular.z = angle * 0.8;
+			twist.linear.x = (distance > 1.0) ? 1.0 : distance;
+		}
+/*
+		if(distance < 0.02 && !pathPoses.size() ) {
+			twist.angular.z = 0.0;
+			twist.linear.x = 0;
+		}
+			
+*/
+
+		velocity_pub.publish(twist);
+
+		ros::spinOnce();
+
+		loop_rate.sleep();
+		++count;
+	}
+
+
+  return 0;
+}
