@@ -39,7 +39,7 @@ Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants 
   - Ce service reçoit un message **pathToGoal** de type **nav_msgs/Path** et répond le message **success** de type **std_msgs/Bool** renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
-      rosrun local_planner_student path_generator_student
+      rosrun local_planner_student testPathGenerator.py
       ```
       Le code source du générateur se trouve dans le fichier [testPathGenerator.py](/script/testPathGenerator.py)
   - La consigne **pathToGoal** est exprimée en absolue dans n'importe quel repère à définir dans **header.frame_id** . Dans le cas du générateur, le **frame_id** envoyé est celui de la **/map**. **Attention** : A sa reception, la position devra être convertie dans le repère de la TF odom.
