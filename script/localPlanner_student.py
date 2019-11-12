@@ -209,7 +209,7 @@ class LocalPlanner:
 
         if len(self.pathPoses) > 0 :
 
-            #TODO for students : calculate distCurTarget and angle
+            #TODO for students : calculate distCurTarget and angle. To compute shortest angle use method shortestAngleDiff defined before
 
             return (distCurTarget, angle)
         
@@ -225,7 +225,7 @@ class LocalPlanner:
         """
         if len(self.pathPoses) > 0 :
 
-            #TODO for students : calculate angle
+            #TODO for students : calculate angle . To compute shortest angle use method shortestAngleDiff defined before
 
             return angle       
         else:
@@ -268,7 +268,7 @@ class LocalPlanner:
 
         twist = Twist()
 
-        twist.angular.z = 0 #TODO for students : Apply gain and saturation (both ROSPARAM) to angle
+        twist.angular.z = 0 #TODO for students : Apply gain and saturation (both ROSPARAM) to angle (as already done for linear velocity)
 
         if(fabs(angle) < self.Angle_to_allow_linear):
             if "" == goalState or "" == goalState : #TODO for students : modify string matching with the state (help in pathSequencer docstring)
