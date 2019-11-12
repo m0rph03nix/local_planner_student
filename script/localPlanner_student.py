@@ -78,8 +78,8 @@ class LocalPlanner:
         # ------------------#
         # ---- Service -----#
         # ------------------#
-        self.opg_Srv = rospy.Service('/move_to/singleGoal', localGoal, self.goalService)
-        self.opg_Srv = rospy.Service('/move_to/pathGoal', PathToGoal, self.pathService)
+        self.goal_Srv = rospy.Service('/move_to/singleGoal', localGoal, self.goalService)
+        self.path_Srv = rospy.Service('/move_to/pathGoal', PathToGoal, self.pathService)
         rospy.loginfo("Planner services initialized")
 
 #******************************************************************************************
