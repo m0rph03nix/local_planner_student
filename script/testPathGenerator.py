@@ -10,7 +10,7 @@ from nav_msgs.msg import Path
 from std_msgs.msg import Bool
 from copy import deepcopy
 
-from local_planner_raph.srv import Path as PathToGoal 
+from local_planner_student.srv import Path as PathToGoal 
 
 class PathGenerator:
 
@@ -20,11 +20,11 @@ class PathGenerator:
 
     def sendTestPath_client(self):
         print "Wait for service" 
-        rospy.wait_for_service('pathService')
+        rospy.wait_for_service('/move_to/pathGoal')
         print "Service found"
         try:
             print "Connect to service"
-            pathToGoal = rospy.ServiceProxy('pathService', PathToGoal)
+            pathToGoal = rospy.ServiceProxy('/move_to/pathGoal', PathToGoal)
             print "Service proxy created"
             fb = pathToGoal( self.generatePath() )
             print "Path sent to service"
@@ -54,7 +54,7 @@ class PathGenerator:
 
         ps.pose.position.x = 8.0
         ps.pose.position.y = 6.0
-        #pm.poses.append( deepcopy(ps) )
+        pm.poses.append( deepcopy(ps) )
 
         ps.pose.position.x = 6.0
         ps.pose.position.y = 7.0
@@ -67,7 +67,7 @@ class PathGenerator:
 
         ps.pose.position.x = 4.0
         ps.pose.position.y = 3.0
-        #pm.poses.append( deepcopy(ps) )   
+        pm.poses.append( deepcopy(ps) )   
         
         ps.pose.orientation.w = 1.0
         ps.pose.orientation.z = 0.0
