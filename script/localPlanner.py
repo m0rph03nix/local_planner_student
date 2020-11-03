@@ -102,7 +102,7 @@ class LocalPlanner:
         self.curPose2D.x = odom.pose.pose.position.x
         self.curPose2D.y = odom.pose.pose.position.y
         self.curPose2D.theta = yaw  
-        rospy.loginfo("X: %f \t Y: %f \t theta: %f"  % (self.curPose2D.x, self.curPose2D.y, self.curPose2D.theta ) )
+        rospy.loginfo("Odom => X: %.2f \t Y: %.2f \t theta: %.2f"  % (self.curPose2D.x, self.curPose2D.y, self.curPose2D.theta ) )
 
                 
     def scanCallback(self, scan):
