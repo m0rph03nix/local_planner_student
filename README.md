@@ -8,7 +8,7 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 
 
 
-Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics **/odom** et **/scan** et se déplaçant en velocité selon le topic **cmd_vel_mux/input/navi** :
+Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics `/odom` et `/scan` et se déplaçant en velocité selon le topic `cmd_vel_mux/input/navi` :
 
 <!---
 graph LR
@@ -29,20 +29,20 @@ roslaunch turtlebot_stage turtlebot_in_stage.launch
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
 + un Goal sur /move_to/singleGoal   
-  - Ce service recoit un message **goalPose2D** de type **geometry_msgs/Pose2D** et répond le message **possible** de type **std_msgs/Bool** donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
-  - La consigne **goalPose2D** est exprimée en absolue dans le repère de la TF odom
+  - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
+  - La consigne `goalPose2D` est exprimée en absolue dans le repère de la TF odom
   - Le plus simple pour appeler ce service est d'utiliser la commande suivante :
     ```{r, engine='bash', count_lines} 
     rosservice call /move_to/singleGoal '[0.0, 0.0, 0.0]'
     ```
 + un Path sur /move_to/pathGoal
-  - Ce service reçoit un message **pathToGoal** de type **nav_msgs/Path** et répond le message **success** de type **std_msgs/Bool** renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
+  - Ce service reçoit un message `pathToGoal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
       rosrun local_planner_student testPathGenerator.py
       ```
       Le code source du générateur se trouve dans le fichier [testPathGenerator.py](/script/testPathGenerator.py)
-  - La consigne **pathToGoal** est exprimée en absolue dans n'importe quel repère à définir dans **header.frame_id** . Dans le cas du générateur, le **frame_id** envoyé est celui de la **/map**. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode transformPose de la lib tf.TransformListener()
+  - La consigne `pathToGoal` est exprimée en absolue dans n'importe quel repère à définir dans `header.frame_id` . Dans le cas du générateur, le `frame_id` envoyé est celui de la `/map`. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode transformPose de la lib tf.TransformListener()
 
 Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abonner aux 2 topics suivants :
 + /scan pour vérifier qu'il n'y ait pas d'obstacle
@@ -52,7 +52,7 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abon
 
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
-  - Merci d'utiliser à cet effet les ROSPARAM **SAT_LINEAR** et **SAT_ANGULAR** passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec **K_LINEAR**, **K_ANGULAR**
+  - Merci d'utiliser à cet effet les ROSPARAM `SAT_LINEAR` et `SAT_ANGULAR` passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec `K_LINEAR`, `K_ANGULAR`
 
 
 <!---
