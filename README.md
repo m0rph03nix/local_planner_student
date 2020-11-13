@@ -27,7 +27,7 @@ Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur faci
 roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
 
-Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscites dans self.pathPoses en suivant les #TODO dans le code**):
+Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
 + un Goal sur /move_to/singleGoal   
   - Ce service recoit un message **goalPose2D** de type **geometry_msgs/Pose2D** et répond le message **possible** de type **std_msgs/Bool** donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
   - La consigne **goalPose2D** est exprimée en absolue dans le repère de la TF odom
