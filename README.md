@@ -28,14 +28,14 @@ roslaunch turtlebot_stage turtlebot_in_stage.launch
 ```
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
-+ un Goal sur /move_to/singleGoal   
++ un Goal sur `/move_to/singleGoal`
   - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
   - La consigne `goalPose2D` est exprimée en absolue dans le repère de la TF odom
   - Le plus simple pour appeler ce service est d'utiliser la commande suivante :
     ```{r, engine='bash', count_lines} 
     rosservice call /move_to/singleGoal '[0.0, 0.0, 0.0]'
     ```
-+ un Path sur /move_to/pathGoal
++ un Path sur `/move_to/pathGoal`
   - Ce service reçoit un message `pathToGoal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
@@ -51,8 +51,9 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abon
 
 
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
-+ /cmd_vel_mux/input/navi de type twist pour piloter le robot en vitesse
-  - Merci d'utiliser à cet effet les ROSPARAM `SAT_LINEAR` et `SAT_ANGULAR` passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec `K_LINEAR`, `K_ANGULAR`
++ `/cmd_vel_mux/input/navi` de type twist pour piloter le robot en vitesse
+  - Merci d'utiliser à cet effet les ROSPARAM `SAT_LINEAR` et `SAT_ANGULAR` passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec `K_LINEAR`, `K_ANGULAR`. 
+  - Prenez en compte aussi ANGLE_TO_ALLOW_LINEAR qui est un angle en radian au-dessus duquel on n'authorise pas de mouvement linéaire.
 
 
 <!---
