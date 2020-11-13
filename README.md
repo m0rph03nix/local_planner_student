@@ -53,7 +53,7 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abon
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + `/cmd_vel_mux/input/navi` de type twist pour piloter le robot en vitesse
   - Merci d'utiliser à cet effet les ROSPARAM `SAT_LINEAR` et `SAT_ANGULAR` passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec `K_LINEAR`, `K_ANGULAR`. 
-  - Prenez en compte aussi ANGLE_TO_ALLOW_LINEAR qui est un angle en radian au-dessus duquel on n'authorise pas de mouvement linéaire.   
+  - Prenez en compte aussi `ANGLE_TO_ALLOW_LINEAR` qui est un angle en radian au-dessus duquel on n'authorise pas de mouvement linéaire.   
   
 Plus globalement, prenez en compte chacun des ROSPARAM passés au contructeur de localPlanner:
 
