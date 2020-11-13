@@ -53,7 +53,22 @@ Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abon
 Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 + `/cmd_vel_mux/input/navi` de type twist pour piloter le robot en vitesse
   - Merci d'utiliser à cet effet les ROSPARAM `SAT_LINEAR` et `SAT_ANGULAR` passés au contructeur de localPlanner. Inspirez-vous ce qui est déjà fait avec `K_LINEAR`, `K_ANGULAR`. 
-  - Prenez en compte aussi ANGLE_TO_ALLOW_LINEAR qui est un angle en radian au-dessus duquel on n'authorise pas de mouvement linéaire.
+  - Prenez en compte aussi ANGLE_TO_ALLOW_LINEAR qui est un angle en radian au-dessus duquel on n'authorise pas de mouvement linéaire.   
+  
+Plus globalement, prenez en compte chacun des ROSPARAM passés au contructeur de localPlanner:
+
+```python
+        self.K_linear               = K_linear              # Proportionnal coefficient for linear velocity
+        self.K_angular              = K_angular             # Proportionnal coefficient for angular velocity
+        self.Sat_linear             = Sat_linear            # Max linear velocity
+        self.Sat_angular            = Sat_angular           # Max angular velocity
+        self.Obstacle_range         = Obstacle_range        # Distance below which we consider an obstacle
+        self.Angle_to_allow_linear  = Angle_to_allow_linear # Below this value : angular control only. Above this value : angular and linear control together
+        self.Waypoint_error         = Waypoint_error        # Euclidian distance error to a waypoint allowing to move to a new waypoint
+        self.Destination_error      = Destination_error     # Euclidian distance error to the final waypoint below which we consider the position reached 
+        self.Angle_error            = Angle_error           # Angular error below which we consider the final orientation reached
+```  
+  
 
 
 <!---
@@ -71,7 +86,8 @@ sequenceDiagram
     Last  pose reached->>Last  pose reached : .
 
 -->
-Machine d'état permettant de passer d'un waypoint à un autre :
+  
+Voici la machine d'état permettant de passer d'un waypoint à un autre :
 
 ![img](img/state_machine.png) 
  
