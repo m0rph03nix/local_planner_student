@@ -51,7 +51,7 @@ class LocalPlanner:
         self.Sat_linear             = Sat_linear            # Max linear velocity
         self.Sat_angular            = Sat_angular           # Max angular velocity
         self.Obstacle_range         = Obstacle_range        # Distance below which we consider an obstacle
-        self.Angle_to_allow_linear  = Angle_to_allow_linear # Below this value : angular control only. Above this value : angular and linear control together
+        self.Angle_to_allow_linear  = Angle_to_allow_linear # Above this value : angular control only. Below this value : angular and linear control together
         self.Waypoint_error         = Waypoint_error        # Euclidian distance error to a waypoint allowing to move to a new waypoint
         self.Destination_error      = Destination_error     # Euclidian distance error to the final waypoint below which we consider the position reached 
         self.Angle_error            = Angle_error           # Angular error below which we consider the final orientation reached
