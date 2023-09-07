@@ -1,0 +1,11 @@
+local_planner_node:
+  ros_parameters:
+    K_LINEAR: 1.0
+    K_ANGULAR: 4.0
+    SAT_LINEAR: 2.0
+    SAT_ANGULAR: 1.5708  # Valeur approximative de pi/2 en radians
+    OBSTACLE_RANGE: 0.5
+    ANGLE_TO_ALLOW_LINEAR: 0.2
+    WAYPOINT_ERROR: 0.16
+    DESTINATION_ERROR: 0.003
+    ANGLE_ERROR: 0.2
