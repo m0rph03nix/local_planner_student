@@ -10,6 +10,9 @@ from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
 from math import fabs, sqrt, atan2, pi, fmod
 
+#from local_planner_raph.srv import LocalGoal
+#from local_planner_raph.srv import PathToGoal
+
 class LocalPlanner(Node):
     """
         A very simplistic local planner !!!
