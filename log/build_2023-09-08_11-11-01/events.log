@@ -1,0 +1,3 @@
+[0.000000] (-) TimerEvent: {}
+[0.000095] (-) JobUnselected: {'identifier': 'local_planner_raph'}
+[0.000117] (-) EventReactorShutdown: {}
