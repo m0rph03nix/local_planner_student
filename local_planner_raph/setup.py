@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'local_planner = local_planner_raph.local_planner:main'
+            'testPathGenerator = local_planner_raph.testPathGenerator:main'
         ],
     },
 )

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+__author__ = 'Raphael LEBER'
+
 import rclpy
 from rclpy.node import Node
 import tf2_ros
@@ -10,8 +12,10 @@ from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
 from math import fabs, sqrt, atan2, pi, fmod
 
-#from local_planner_raph.srv import LocalGoal
-#from local_planner_raph.srv import PathToGoal
+from tf_transformations import euler_from_quaternion, quaternion_from_euler
+
+from local_planner_srvs.srv import LocalGoal
+from local_planner_srvs.srv import PathToGoal
 
 class LocalPlanner(Node):
     """
@@ -96,15 +100,17 @@ class LocalPlanner(Node):
         # --- Publisher ---#
         # ------------------#
         # velocity command
-        self.velocity_pub = self.create_publisher(Twist, 'cmd_vel_mux/input/navi', 10)
+        self.velocity_pub = self.create_publisher(Twist, '/cmd_vel', 10)
 
         # ------------------#
         # ---- Services ----#
         # ------------------#
-        self.goal_service = self.create_service(localGoal, 'goalService', self.goal_service_callback)
+        self.goal_service = self.create_service(LocalGoal, 'goalService', self.goal_service_callback)
         self.path_service = self.create_service(PathToGoal, 'pathService', self.path_service_callback)
 
-        self.local_planning()
+        # LOCAL PLANNING
+        timer_period = 0.05  # 20Hz
+        self.create_timer(timer_period, self.local_planning)
 
     #******************************************************************************************
     #*********************************   SUBSCRIBERS CALLBACK   ********************************
@@ -117,11 +123,12 @@ class LocalPlanner(Node):
         """
         o = odom.pose.pose.orientation
         orientation_list = [o.x, o.y, o.z, o.w]
-        (roll, pitch, yaw) = tf2_ros.transformations.euler_from_quaternion(orientation_list)
+        (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
         self.curPose2D.x = odom.pose.pose.position.x
         self.curPose2D.y = odom.pose.pose.position.y
         self.curPose2D.theta = yaw
-        self.get_logger().info("Odom => X: %.2f \t Y: %.2f \t theta: %.2f"  % (self.curPose2D.x, self.curPose2D.y, self.curPose2D.theta ) )
+
+        #self.get_logger().info("Odom => X: %.2f \t Y: %.2f \t theta: %.2f"  % (self.curPose2D.x, self.curPose2D.y, self.curPose2D.theta ) )
 
     def scan_callback(self, scan):
         """
@@ -146,9 +153,9 @@ class LocalPlanner(Node):
             Add the pose in arg req to the path (self.pathPoses) if no obstacles are seen
             Return std_msgs/Bool at True
         """
-        self.add_pose_2d_to_path(request.goalPose2D, True)
-        self.get_logger().info("Goal to x = %.2f    y = %.2f"  % (request.goalPose2D.x, request.goalPose2D.y))
-        response.data = not self.isObstacle
+        self.add_pose_2d_to_path(request.goal_pose2d, True)
+        self.get_logger().info("Goal to x = %.2f    y = %.2f"  % (request.goal_pose2d.x, request.goal_pose2d.y))
+        response.possible.data = not self.isObstacle
         return response
 
     def path_service_callback(self, request, response):
@@ -213,7 +220,7 @@ class LocalPlanner(Node):
             Argument clear (type bool) clears the existing Path (self.pathPoses) when set to true
         """   
         ps = PoseStamped()
-        q = tf2_ros.transformations.quaternion_from_euler(0.0, 0.0, p.theta)
+        q = quaternion_from_euler(0.0, 0.0, p.theta)
         ps.header.frame_id = "odom"
         ps.header.stamp = self.get_clock().now().to_msg()
         ps.pose.position.x = p.x
@@ -248,7 +255,7 @@ class LocalPlanner(Node):
         """
         if len(self.pathPoses) > 0:
             o = self.pathPoses[0].pose.orientation
-            (R, P, Y) = tf2_ros.transformations.euler_from_quaternion((o.x, o.y, o.z, o.w))
+            (R, P, Y) = euler_from_quaternion((o.x, o.y, o.z, o.w))
             angle = self.shortest_angle_diff(Y, self.curPose2D.theta)
             return angle       
         else:
@@ -259,6 +266,7 @@ class LocalPlanner(Node):
             Switch between the following sequences: "New Goal" <--> "Reach in progress" --> "Last Goal position Reached" --> "Last Goal pose (position + orientation) Reached"
             :return: One of the strings: "New Goal", "Reach in progress",  "Last Goal position Reached", "Last Goal pose (position + orientation) Reached"
         """
+
         if (dist < self.Waypoint_error) and len(self.pathPoses) > 1:
             del self.pathPoses[0]
             # computeVelocity
@@ -291,12 +299,12 @@ class LocalPlanner(Node):
         if fabs(angle) < self.Angle_to_allow_linear:
             if goalState == "New Goal" or goalState == "Reach in progress":
                 if self.isObstacle:
-                    twist.linear.x = 0
+                    twist.linear.x = 0.0
                 else:
                     twist.linear.x = min(dist * self.K_linear, self.Sat_linear)   
 
         if goalState == "Last Goal pose (position + orientation) Reached":
-            twist.angular.z = 0
+            twist.angular.z = 0.0
 
         return twist   
 
@@ -312,17 +320,16 @@ class LocalPlanner(Node):
                 5/ Call method to compute velocity
                 6/ Publish velocity
         """
-        timer_period = 0.05  # 20Hz
-        self.create_timer(timer_period, self.timer_callback)
 
-    def timer_callback(self):
         (dist, angle) = self.compute_dist_angle()
+
         if len(self.pathPoses) == 1:
             finalOrientation = self.compute_final_orientation()
         else:
-            finalOrientation = 0
+            finalOrientation = 0.0
 
         goalState = self.path_sequencer(dist, angle, finalOrientation)
+
         if goalState == "New Goal":
             (dist, angle) = self.compute_dist_angle()
         elif goalState == "Last Goal position Reached" or goalState == "Last Goal pose (position + orientation) Reached":
