@@ -60,9 +60,9 @@ class LocalPlanner(Node):
                 ('SAT_ANGULAR', (3.14159265359 / 2.0)),
                 ('OBSTACLE_RANGE', 0.),
                 ('ANGLE_TO_ALLOW_LINEAR', 0.2),
-                ('WAYPOINT_ERROR', 0.16),
-                ('DESTINATION_ERROR', 0.003),
-                ('ANGLE_ERROR', 0.2)
+                ('WAYPOINT_EPS', 0.16),
+                ('DESTINATION_EPS', 0.003),
+                ('ANGLE_EPS', 0.2)
             ]
         )
 
@@ -79,11 +79,11 @@ class LocalPlanner(Node):
         # Above this value: angular control only. Below this value: angular and linear control together
         self.Angle_to_allow_linear = self.get_parameter('ANGLE_TO_ALLOW_LINEAR').get_parameter_value().double_value or 0.2
         # Euclidian distance error to a waypoint allowing to move to a new waypoint
-        self.Waypoint_error = self.get_parameter('WAYPOINT_ERROR').get_parameter_value().double_value or 0.16
+        self.Waypoint_eps = self.get_parameter('WAYPOINT_EPS').get_parameter_value().double_value or 0.16
         # Euclidian distance error to the final waypoint below which we consider the position reached
-        self.Destination_error = self.get_parameter('DESTINATION_ERROR').get_parameter_value().double_value or 0.003
+        self.Destination_eps = self.get_parameter('DESTINATION_EPS').get_parameter_value().double_value or 0.003
         # Angular error below which we consider the final orientation reached
-        self.Angle_error = self.get_parameter('ANGLE_ERROR').get_parameter_value().double_value or 0.2
+        self.Angle_eps = self.get_parameter('ANGLE_EPS').get_parameter_value().double_value or 0.2
        
 
         # tf2_ros transform listener
@@ -185,20 +185,6 @@ class LocalPlanner(Node):
             
         return response
 
-    #******************************************************************************************
-    #********************************   OBSTACLES COMPUTATION   *******************************
-    #******************************************************************************************
-
-    def less_obstacles_angle(self, scan):
-        """
-            #TODO
-        """ 
-        # Your implementation here
-        pass
-
-    def compute_new_waypoint(self, angle):
-        # Your implementation here
-        pass
 
     #******************************************************************************************
     #**********************************   GOALS COMPUTATION   *********************************
@@ -272,14 +258,14 @@ class LocalPlanner(Node):
             :return: One of the strings: "New Goal", "Reach in progress",  "Last Goal position Reached", "Last Goal pose (position + orientation) Reached"
         """
 
-        if (dist < self.Waypoint_error) and len(self.pathPoses) > 1:
+        if (dist < self.Waypoint_eps) and len(self.pathPoses) > 1:
             del self.pathPoses[0]
             # computeVelocity
             self.get_logger().info("# New goal : x=%f ; y=%f"  % (self.pathPoses[0].pose.position.x, self.pathPoses[0].pose.position.y))
             return "New Goal"
 
-        elif (dist < self.Destination_error) and len(self.pathPoses) == 1:
-            if fabs(finalOrientation) >= self.Angle_error:
+        elif (dist < self.Destination_eps) and len(self.pathPoses) == 1:
+            if fabs(finalOrientation) >= self.Angle_eps:
                 state = "Last Goal position Reached"
             else:
                 state = "Last Goal pose (position + orientation) Reached"
@@ -342,6 +328,8 @@ class LocalPlanner(Node):
 
         twist = self.compute_velocity(dist, angle, goalState)
         self.velocity_pub.publish(twist)
+
+
 
 def main(args=None):
     rclpy.init(args=args)
