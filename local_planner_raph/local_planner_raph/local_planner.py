@@ -124,27 +124,19 @@ class LocalPlanner(Node):
             Odometry callback
             Set curPose2D with current robot x y theta
         """
-        o = odom.pose.pose.orientation
-        orientation_list = [o.x, o.y, o.z, o.w]
-        (roll, pitch, yaw) = euler_from_quaternion(orientation_list)
-        self.curPose2D.x = odom.pose.pose.position.x
-        self.curPose2D.y = odom.pose.pose.position.y
-        self.curPose2D.theta = yaw
+        
+        #TODO for students : Fill in self.curPose2D (help : use euler_from_quaternion)
 
-        #self.get_logger().info("Odom => X: %.2f \t Y: %.2f \t theta: %.2f"  % (self.curPose2D.x, self.curPose2D.y, self.curPose2D.theta ) )
 
     def scan_callback(self, scan):
         """
             Laser scan callback
             Detect (set isObstacle = true) and log if obstacle
         """        
-        scan_size = len(scan.ranges)
-        self.isObstacle = False
+        
+        #TODO for students : If an obstacle below self.Obstacle_range if detected, then self.isObstacle = True, False otherwise
 
-        for i in range(scan_size):
-            if scan.ranges[i] < self.Obstacle_range:
-                self.isObstacle = True
-                self.get_logger().info("### OBSTACLE : Distance[%f]   Angle[%f]"  % (scan.ranges[i],  scan.angle_min + i * scan.angle_increment))
+
 
     #******************************************************************************************
     #**************************************   SERVICES   **************************************
@@ -174,6 +166,9 @@ class LocalPlanner(Node):
 
             for pose_stamp in request.path_to_goal.poses:
                 pose_stamp.pose = do_transform_pose(pose_stamp.pose, transform)
+
+                #TODO for students : Apply tranform on each Pose (of PoseStamped) with 'do_transform_pose' method out of tf.TransformListener()
+
                 self.pathPoses.append(pose_stamp)
 
             self.get_logger().info("### New path with %d poses" % len(self.pathPoses))
@@ -231,10 +226,11 @@ class LocalPlanner(Node):
             Return a tuple (distance, angle) with distance and angle to the target
         """           
         if len(self.pathPoses) > 0:
-            pathPosePosition = self.pathPoses[0].pose.position
-            distCurTarget = sqrt(pow(pathPosePosition.x - self.curPose2D.x, 2) + pow(pathPosePosition.y - self.curPose2D.y, 2))
-            angleCurTarget = atan2(pathPosePosition.y - self.curPose2D.y, pathPosePosition.x - self.curPose2D.x)
-            angle = self.shortest_angle_diff(angleCurTarget, self.curPose2D.theta)
+            
+            
+            #TODO for students : calculate distCurTarget and angle. To compute shortest angle use method shortestAngleDiff defined before
+
+
             return (distCurTarget, angle)
         else:
             return (0, 0)
@@ -245,9 +241,12 @@ class LocalPlanner(Node):
             Return an angle (float)
         """
         if len(self.pathPoses) > 0:
-            o = self.pathPoses[0].pose.orientation
-            (R, P, Y) = euler_from_quaternion((o.x, o.y, o.z, o.w))
-            angle = self.shortest_angle_diff(Y, self.curPose2D.theta)
+
+
+            #TODO for students : calculate angle . To compute shortest angle use method shortestAngleDiff defined before
+
+
+
             return angle       
         else:
             return 0
@@ -259,16 +258,19 @@ class LocalPlanner(Node):
         """
 
         if (dist < self.Waypoint_eps) and len(self.pathPoses) > 1:
+            
             del self.pathPoses[0]
             # computeVelocity
             self.get_logger().info("# New goal : x=%f ; y=%f"  % (self.pathPoses[0].pose.position.x, self.pathPoses[0].pose.position.y))
-            return "New Goal"
+            
+            return ""   #TODO for students : return string matching with the state
+
 
         elif (dist < self.Destination_eps) and len(self.pathPoses) == 1:
             if fabs(finalOrientation) >= self.Angle_eps:
-                state = "Last Goal position Reached"
+                state = ""  #TODO for students : return string matching with the state
             else:
-                state = "Last Goal pose (position + orientation) Reached"
+                state = ""  #TODO for students : return string matching with the state
 
             self.get_logger().info("# %s : X = %.2f ; Y = %.2f "  % (state, self.pathPoses[0].pose.position.x, self.pathPoses[0].pose.position.y))
             return state
@@ -285,16 +287,16 @@ class LocalPlanner(Node):
         """
         twist = Twist()
 
-        twist.angular.z = min([angle * self.K_angular, self.Sat_angular])
+        twist.angular.z = 0 #TODO for students : Change 0 with gain and saturation (both ROSPARAM) applied to angle (as already done for linear velocity)
 
         if fabs(angle) < self.Angle_to_allow_linear:
-            if goalState == "New Goal" or goalState == "Reach in progress":
+            if goalState == "" or goalState == "":  #TODO for students : modify string matching with the state (help in pathSequencer docstring)  
                 if self.isObstacle:
                     twist.linear.x = 0.0
                 else:
                     twist.linear.x = min(dist * self.K_linear, self.Sat_linear)   
 
-        if goalState == "Last Goal pose (position + orientation) Reached":
+        if goalState == "": #TODO for students : modify string matching with the state (help in pathSequencer docstring)
             twist.angular.z = 0.0
 
         return twist   
@@ -314,16 +316,17 @@ class LocalPlanner(Node):
 
         (dist, angle) = self.compute_dist_angle()
 
-        if len(self.pathPoses) == 1:
+        if len(self.pathPoses) == 1:  
             finalOrientation = self.compute_final_orientation()
         else:
             finalOrientation = 0.0
 
         goalState = self.path_sequencer(dist, angle, finalOrientation)
 
-        if goalState == "New Goal":
+        if goalState == "": #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
             (dist, angle) = self.compute_dist_angle()
-        elif goalState == "Last Goal position Reached" or goalState == "Last Goal pose (position + orientation) Reached":
+
+        elif goalState == "" or goalState == "":    #TODO for students : modify string matching with the state (help in pathSequencer docstring)        
             angle = finalOrientation
 
         twist = self.compute_velocity(dist, angle, goalState)
