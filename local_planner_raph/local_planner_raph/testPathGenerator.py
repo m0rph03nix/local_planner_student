@@ -5,6 +5,13 @@ __author__ = 'Raphael LEBER'
 import rclpy
 from rclpy.node import Node
 
+from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import Path
+from std_msgs.msg import Bool
+from copy import deepcopy
+
+from builtin_interfaces.msg import Time
+
 from local_planner_srvs.srv import PathToGoal
 
 class PathGenerator(Node):
@@ -14,35 +21,29 @@ class PathGenerator(Node):
 
     def __init__(self):
         super().__init__('testPathGenerator')
+ 
         self.cli = self.create_client(PathToGoal, 'pathService')
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = PathToGoal.Request()
 
 
-    def sendTestPath_client(self):
-        print("Wait for service" )
-        rospy.wait_for_service('/move_to/pathGoal')
-        print("Service found")
-        try:
-            print("Connect to service")
-            pathToGoal = rospy.ServiceProxy('/move_to/pathGoal', PathToGoal)
-            print("Service proxy created")
-            fb = pathToGoal( self.generatePath() )
-            print("Path sent to service")
-            return fb.success
-        except rospy.ServiceException, e:
-            print("Service call failed: %s" % e)     
+    def send_request(self):
+        self.req.path_to_goal = self.generatePath()
+
+        self.future = self.cli.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+        return self.future.result()  
 
 
     def generatePath(self):
         pm = Path() 
-        pm.header.frame_id = "/map"
-        pm.header.stamp = rospy.Time.now()
+        pm.header.frame_id = "map"
+        pm.header.stamp = self.get_clock().now().to_msg()
 
         ps = PoseStamped()
         ps.header.frame_id = pm.header.frame_id
-        ps.header.stamp = rospy.Time.now()
+        ps.header.stamp = self.get_clock().now().to_msg()
 
         # One way
         ps.pose.position.x = 2.8
@@ -85,12 +86,20 @@ class PathGenerator(Node):
 #***************************************   MAIN   *****************************************
 #******************************************************************************************
 
+def main(args=None):
+
+    rclpy.init()
+
+    pg = PathGenerator()
+
+    response = pg.send_request()
+
+    pg.get_logger().info(str(response.success))
+
+    pg.destroy_node()
+    rclpy.shutdown()
+
+
 if __name__ == '__main__':
-    try:
-
-        pg = PathGenerator()
-        pg.sendTestPath_client()
-        rospy.spin()
-
-    except rospy.ROSInterruptException:
-        pass            
+    main()
+        

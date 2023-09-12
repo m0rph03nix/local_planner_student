@@ -5,12 +5,15 @@ __author__ = 'Raphael LEBER'
 import rclpy
 from rclpy.node import Node
 import tf2_ros
+from tf2_ros import Buffer
 from tf2_geometry_msgs import do_transform_pose
 from geometry_msgs.msg import Twist, Point, PoseStamped, Pose2D
 from nav_msgs.msg import Path, Odometry
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
 from math import fabs, sqrt, atan2, pi, fmod
+
+from copy import deepcopy
 
 from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
@@ -164,19 +167,28 @@ class LocalPlanner(Node):
             Try to add the Path received by the client to the Path (self.pathPoses) with a TF transform between the frame_id and /odom
             Return std_msgs/Bool message with True if the "try" succeeded, else (exception case) return False
         """           
-        listener = tf2_ros.TransformListener(self.tf_buffer)
+        listener = tf2_ros.TransformListener(self.tf_buffer, self)
+        buffer = Buffer()
+
+        self.pathPoses.clear()
 
         try:
-            transform = self.tf_buffer.lookup_transform("odom", request.pathToGoal.header.frame_id, rclpy.time.Time())
-            path_to_goal_transformed = do_transform_pose(request.pathToGoal, transform)
-            self.pathPoses.clear()
-            self.pathPoses.append(path_to_goal_transformed)
+            for i in range( len(request.path_to_goal.poses)):
+                print("{0} step 1".format(i))
+                #if buffer.can_transform("odom", request.path_to_goal.header.frame_id, rclpy.time.Time(), rclpy.time.Duration(seconds = 3)):
+                transform = self.tf_buffer.lookup_transform("odom", request.path_to_goal.header.frame_id, self.get_clock().now(), rclpy.time.Duration(seconds = 10))
+                print("{0} step 2".format(i))
+                pose = do_transform_pose(request.path_to_goal.poses[i].pose, transform)
+                request.path_to_goal.poses[i].pose = deepcopy(pose)
+                print("{0} step 3".format(i))
+                self.pathPoses.append(request.path_to_goal.poses[i])
+
             self.get_logger().info("### New path with %d poses" % len(self.pathPoses))
-            response.data = True
+            response.success.data = True
 
         except Exception as err:
             self.get_logger().info(str(err))
-            response.data = False
+            response.success.data = False
             
         return response
 

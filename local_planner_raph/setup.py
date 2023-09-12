@@ -23,8 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'local_planner = local_planner_raph.local_planner:main'
-            'testPathGenerator = local_planner_raph.testPathGenerator:main'
+            'local_planner = local_planner_raph.local_planner:main',
+            'test_path_generator = local_planner_raph.testPathGenerator:main'
         ],
     },
 )
