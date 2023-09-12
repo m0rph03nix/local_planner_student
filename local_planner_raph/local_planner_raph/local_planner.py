@@ -167,21 +167,14 @@ class LocalPlanner(Node):
             Try to add the Path received by the client to the Path (self.pathPoses) with a TF transform between the frame_id and /odom
             Return std_msgs/Bool message with True if the "try" succeeded, else (exception case) return False
         """           
-        listener = tf2_ros.TransformListener(self.tf_buffer, self)
-        buffer = Buffer()
-
         self.pathPoses.clear()
 
         try:
-            for i in range( len(request.path_to_goal.poses)):
-                print("{0} step 1".format(i))
-                #if buffer.can_transform("odom", request.path_to_goal.header.frame_id, rclpy.time.Time(), rclpy.time.Duration(seconds = 3)):
-                transform = self.tf_buffer.lookup_transform("odom", request.path_to_goal.header.frame_id, self.get_clock().now(), rclpy.time.Duration(seconds = 10))
-                print("{0} step 2".format(i))
-                pose = do_transform_pose(request.path_to_goal.poses[i].pose, transform)
-                request.path_to_goal.poses[i].pose = deepcopy(pose)
-                print("{0} step 3".format(i))
-                self.pathPoses.append(request.path_to_goal.poses[i])
+            transform = self.tf_buffer.lookup_transform("odom", request.path_to_goal.header.frame_id, self.get_clock().now(), rclpy.time.Duration(seconds = 10))
+
+            for pose_stamp in request.path_to_goal.poses:
+                pose_stamp.pose = do_transform_pose(pose_stamp.pose, transform)
+                self.pathPoses.append(pose_stamp)
 
             self.get_logger().info("### New path with %d poses" % len(self.pathPoses))
             response.success.data = True
