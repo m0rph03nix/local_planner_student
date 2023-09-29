@@ -4,7 +4,7 @@
 ros2 run stage_ros stageros src/stage_ros/world/maze.world
 ```
 ```bash
-ros2 run local_planner_raph local_planner
+ros2 run local_planner_student local_planner
 ```
 
 ```bash

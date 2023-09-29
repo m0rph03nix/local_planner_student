@@ -10,11 +10,11 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'param_file',
             description='Full path to the parameter file to load',
-            default_value=[TextSubstitution(text='$(find local_planner_raph)/config/config.yaml')]
+            default_value=[TextSubstitution(text='$(find local_planner_student)/config/config.yaml')]
         ),
 
         Node(
-            package='local_planner_raph',
+            package='local_planner_student',
             executable='local_planner',
             name='local_planner',
             output='screen',

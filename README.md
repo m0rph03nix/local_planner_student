@@ -1,5 +1,4 @@
-# local_planner_raph
-
+# local_planner_student
 
 
 # local_planner_student
@@ -103,10 +102,31 @@ Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lor
 
 
 
+# FAQ
+
+## Errors
+
+### tf_transforms
+
+> :x: ModuleNotFoundError: No module named 'tf_transformations'
+```bash
+# Install this 
+pip3 install transforms3d
+
+# Then...
+
+# if you are root do this :
+sudo apt-get install ros-humble-tf-transformations
+
+# if you are not root, clone and build the sources in your workspace src folder :
+git clone git@github.com:DLu/tf_transformations.git
+```
 
 
 
+## Commands
 
+### Service /goalService
 
 ```bash
 ros2 service call /goalService local_planner_srvs/srv/LocalGoal "{
