@@ -1,5 +1,3 @@
-# local_planner_student
-
 
 # local_planner_student
 
@@ -11,19 +9,19 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 
 
 
-Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics `/odom` et `/scan` et se déplaçant en velocité selon le topic `cmd_vel_mux/input/navi` :
+Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics `/odom` et `/scan` et se déplaçant en velocité selon le topic `cmd_vel` :
 
-<!---
+
+```mermaid 
 graph LR
-    T1[Odometry source] -- /odom --TO_REMOVE> Node((local_planner_student))
-    T2[Laser source] -- /scan --TO_REMOVE> Node((local_planner_student))
+    T1[Odometry source] -- /odom --> Node((local_planner_student))
+    T2[Laser source] -- /scan --> Node((local_planner_student))
 
-    S1[ ] -. /move_to/singleGoal .-> Node
-    S2[ ] -. /move_to/pathGoal .-> Node
+    S1[ ] -. /goalService .-> Node
+    S2[ ] -. /pathService .-> Node
 
-    Node -- /cmd_vel_mux/input/navi --TO_REMOVE>D[base controller]
--->
-![Status: Draft](img/local_archi.png) 
+    Node -- /cmd_vel -->D[base controller]
+```
 
 Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
 ```{r, engine='bash', count_lines} 
