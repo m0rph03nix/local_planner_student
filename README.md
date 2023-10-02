@@ -1,7 +1,7 @@
 
 # local_planner_student
 
-Le but de ce TP est de coder un "local planner" sur la base du template fourni : [localPlanner_student.py](/script/localPlanner_student.py)
+Le but de ce TP est de coder un "local planner" sur la base du template fourni : [local_planner.py](local_planner_student/local_planner_student/local_planner.py)
 
 | ![local_planner.jpg](img/local_planner.jpg) |
 |:-------:|
@@ -9,7 +9,11 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 
 
 
-Ce "local planner" fonctionne (une fois complété) avec un robot (à base différentielle) fournissant les topics `/odom` et `/scan` et se déplaçant en velocité selon le topic `cmd_vel` :
+Ce "local planner" fonctionne (une fois complété :smile:) avec un robot à base différentielle.
+- Entrées : 
+  - Capteurs : topics `/odom` et `/scan`
+  - Ordre : services `/goalService` ou `/pathService` 
+- Sorties : commande en velocité envoyée sur le topic `/cmd_vel` :
 
 
 ```mermaid 
@@ -23,10 +27,7 @@ graph LR
     Node -- /cmd_vel -->D[base controller]
 ```
 
-Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Je vous propose d'utiliser le turtlebot dans le simulateur stage: 
-```{r, engine='bash', count_lines} 
-roslaunch turtlebot_stage turtlebot_in_stage.launch
-```
+Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student)
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
 + un Goal sur `/move_to/singleGoal`
