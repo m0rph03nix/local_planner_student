@@ -8,6 +8,7 @@ Le but de ce TP est de coder un "local planner" sur la base du template fourni :
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
 
+Ce repository NE FONCTIONNE PAS EN L'ETAT. Il faut d'abord compléter toutes les balises `#TODO` après avoir lu tout ce README d'explication.  
 
 Ce "local planner" fonctionne (une fois complété :smile:) avec un robot à base différentielle.
 - Entrées : 
@@ -30,21 +31,27 @@ graph LR
 Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student)
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
-+ un Goal sur `/move_to/singleGoal`
-  - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir fichier [localGoal.srv](/srv/localGoal.srv)
-  - La consigne `goalPose2D` est exprimée en absolue dans le repère de la TF odom
++ un Goal sur `goalService`
+  - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir le fichier [localGoal.srv](local_planner_srvs/srv/LocalGoal.srv) dans le paquet local_planner_srvs.
+  - La consigne `goal_pose2d` est exprimée en absolue dans le repère de la TF odom
   - Le plus simple pour appeler ce service est d'utiliser la commande suivante :
     ```{r, engine='bash', count_lines} 
-    rosservice call /move_to/singleGoal '[0.0, 0.0, 0.0]'
+    ros2 service call /goalService local_planner_srvs/srv/LocalGoal "{
+      'goal_pose2d': {
+        'x': 1.0,
+        'y': 1.0,
+        'theta': 0.0
+      }
+    }"
     ```
-+ un Path sur `/move_to/pathGoal`
-  - Ce service reçoit un message `pathToGoal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [Path.srv](/srv/Path.srv)
++ un Path sur `/pathService`
+  - Ce service reçoit un message `path_to_goal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [PathToGoal.srv](local_planner_srvs/srv/PathToGoal.srv) dans le paquet local_planner_srvs.
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
-      rosrun local_planner_student testPathGenerator.py
+      ros2 run local_planner_student testPathGenerator
       ```
-      Le code source du générateur se trouve dans le fichier [testPathGenerator.py](/script/testPathGenerator.py)
-  - La consigne `pathToGoal` est exprimée en absolue dans n'importe quel repère à définir dans `header.frame_id` . Dans le cas du générateur, le `frame_id` envoyé est celui de la `/map`. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode transformPose de la lib tf.TransformListener()
+      Le code source du générateur se trouve dans le fichier [testPathGenerator.py](local_planner_raph/local_planner_raph/testPathGenerator.py)
+  - La consigne `path_to_goal` est exprimée en absolue dans n'importe quel repère à définir dans `header.frame_id` . Dans le cas du générateur, le `frame_id` envoyé est celui de la `/map`. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode `do_transform_pose` avec la transformation issue de la methode `lookup_transform`.
 
 Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abonner aux 2 topics suivants :
 + /scan pour vérifier qu'il n'y ait pas d'obstacle
@@ -60,15 +67,24 @@ Pour déplacer le robot, vous devrez publier un topic de commande en velocité:
 Plus globalement, prenez en compte chacun des ROSPARAM passés au contructeur de localPlanner:
 
 ```python
-        self.K_linear               = K_linear              # Proportionnal coefficient for linear velocity
-        self.K_angular              = K_angular             # Proportionnal coefficient for angular velocity
-        self.Sat_linear             = Sat_linear            # Max linear velocity
-        self.Sat_angular            = Sat_angular           # Max angular velocity
-        self.Obstacle_range         = Obstacle_range        # Distance below which we consider an obstacle
-        self.Angle_to_allow_linear  = Angle_to_allow_linear # Below this value : angular control only. Above this value : angular and linear control together
-        self.Waypoint_error         = Waypoint_error        # Euclidian distance error to a waypoint allowing to move to a new waypoint
-        self.Destination_error      = Destination_error     # Euclidian distance error to the final waypoint below which we consider the position reached 
-        self.Angle_error            = Angle_error           # Angular error below which we consider the final orientation reached
+        # Proportionnal coefficient for linear velocity
+        self.K_linear = self.get_parameter('K_LINEAR').get_parameter_value().double_value or 1.0
+        # Proportionnal coefficient for angular velocity
+        self.K_angular = self.get_parameter('K_ANGULAR').get_parameter_value().double_value or 4.0
+        # Max linear velocity
+        self.Sat_linear = self.get_parameter('SAT_LINEAR').get_parameter_value().double_value or 2.0
+        # Max angular velocity
+        self.Sat_angular = self.get_parameter('SAT_ANGULAR').get_parameter_value().double_value or (3.14159265359 / 2.0)  # Approximation of pi
+        # Distance below which we consider an obstacle
+        self.Obstacle_range = self.get_parameter('OBSTACLE_RANGE').get_parameter_value().double_value or 0.5
+        # Above this value: angular control only. Below this value: angular and linear control together
+        self.Angle_to_allow_linear = self.get_parameter('ANGLE_TO_ALLOW_LINEAR').get_parameter_value().double_value or 0.2
+        # Euclidian distance error to a waypoint allowing to move to a new waypoint
+        self.Waypoint_eps = self.get_parameter('WAYPOINT_EPS').get_parameter_value().double_value or 0.16
+        # Euclidian distance error to the final waypoint below which we consider the position reached
+        self.Destination_eps = self.get_parameter('DESTINATION_EPS').get_parameter_value().double_value or 0.003
+        # Angular error below which we consider the final orientation reached
+        self.Angle_eps = self.get_parameter('ANGLE_EPS').get_parameter_value().double_value or 0.2
 ```  
   
 
@@ -95,8 +111,12 @@ Voici la machine d'état permettant de passer d'un waypoint à un autre :
  
 
 
-**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires "#TODO" indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
-Commencez par les callbacks, puis par déplacer le robot pour 1 seul Target. Lorque le progrmamme fonctionne bien avec le service /move_to/singleGoal , ajoutez la fonctionnalité du Path. Pour finir veillez à l'orientation finale**
+**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires `#TODO` indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
+Commencez par les `#TODO` des callbacks de topics. Continuez par tous les autres `#TODO`. Celui de la méthode `path_service_callback` peut se faire éventuellement dans un second temps.
+
+En effet, avant de tester le service associé à `path_service_callback` (`/pathService`), il faudra d'abord tester le service associé à `goal_service_callback` (`/goalService`), qui est nettement plus simple (un goal, plutôt qu'une liste de waypoints).
+
+Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la fonctionnalité du service `/pathService`. Pour finir veillez à l'orientation finale**
 
 
 
