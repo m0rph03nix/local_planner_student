@@ -2,13 +2,14 @@
 # local_planner_student
 
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [local_planner.py](local_planner_student/local_planner_student/local_planner.py)
+Ce fichier NE FONCTIONNE DONC PAS EN L'ETAT. Il faut d'abord compléter toutes les balises `#TODO` après avoir lu tout ce README d'explication.    
+
+Voici le schéma de principe du fonctionnement de ce "local planner" : 
 
 | ![local_planner.jpg](img/local_planner.jpg) |
 |:-------:|
 | *local_planner_student basic principle for a differential drive robot like turtlebot* |
 
-
-Ce repository NE FONCTIONNE PAS EN L'ETAT. Il faut d'abord compléter toutes les balises `#TODO` après avoir lu tout ce README d'explication.  
 
 Ce "local planner" fonctionne (une fois complété :smile:) avec un robot à base différentielle.
 - Entrées : 
@@ -30,7 +31,7 @@ graph LR
 
 Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student)
 
-Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants (**Les services sont codés, mais c'est à vous de coder la prise en charge des données inscrites dans self.pathPoses en suivant les #TODO dans le code**):
+Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
 + un Goal sur `goalService`
   - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir le fichier [localGoal.srv](local_planner_srvs/srv/LocalGoal.srv) dans le paquet local_planner_srvs.
   - La consigne `goal_pose2d` est exprimée en absolue dans le repère de la TF odom
@@ -111,12 +112,12 @@ Voici la machine d'état permettant de passer d'un waypoint à un autre :
  
 
 
-**Beaucoup de code est déjà fonctionnel. Complétez le template. Des commentaires `#TODO` indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code.
+Imprégnez-vous de la structure du code. Complétez le template. Des commentaires `#TODO` indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code (pas recommandé dans le temps imparti).
 Commencez par les `#TODO` des callbacks de topics. Continuez par tous les autres `#TODO`. Celui de la méthode `path_service_callback` peut se faire éventuellement dans un second temps.
 
 En effet, avant de tester le service associé à `path_service_callback` (`/pathService`), il faudra d'abord tester le service associé à `goal_service_callback` (`/goalService`), qui est nettement plus simple (un goal, plutôt qu'une liste de waypoints).
 
-Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la fonctionnalité du service `/pathService`. Pour finir veillez à l'orientation finale**
+Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la fonctionnalité du service `/pathService`. Pour finir veillez à l'orientation finale.
 
 
 
