@@ -33,7 +33,7 @@ Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur faci
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
 + un Goal sur `goalService`
-  - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée.  Voir le fichier [localGoal.srv](local_planner_srvs/srv/LocalGoal.srv) dans le paquet local_planner_srvs.
+  - Ce service recoit un message `goalPose2D` de type `geometry_msgs/Pose2D` et répond le message `possible` de type `std_msgs/Bool` donnant la faisabilité de la consigne demandée (on ne fera que vérifier de manière simpliste qu'il n'y a pas d'obstable dans la zone OBSTACLE_RANGE). Les messages du service sont dans le fichier [localGoal.srv](local_planner_srvs/srv/LocalGoal.srv) dans le paquet local_planner_srvs.
   - La consigne `goal_pose2d` est exprimée en absolue dans le repère de la TF odom
   - Le plus simple pour appeler ce service est d'utiliser la commande suivante :
     ```{r, engine='bash', count_lines} 
@@ -46,7 +46,7 @@ Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants 
     }"
     ```
 + un Path sur `/pathService`
-  - Ce service reçoit un message `path_to_goal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de l'execution de la trajectoire demandée. Voir fichier [PathToGoal.srv](local_planner_srvs/srv/PathToGoal.srv) dans le paquet local_planner_srvs.
+  - Ce service reçoit un message `path_to_goal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de prise en compte de la liste de waypoints (ne garantis pas qu'elle sera bien effectuée sans obstacles) Les messages du service sont dans le fichier [PathToGoal.srv](local_planner_srvs/srv/PathToGoal.srv) dans le paquet local_planner_srvs.
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
       ros2 run local_planner_student testPathGenerator
