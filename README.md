@@ -90,25 +90,29 @@ Plus globalement, prenez en compte chacun des ROSPARAM passés au contructeur de
   
 
 
-<!---
+
+
+Voici la machine d'état permettant de passer d'un waypoint à un autre :
+
+```mermaid
 sequenceDiagram
     participant New Goal
     participant Reach in progress
     participant Last  position reached
     participant Last  pose reached
-    New Goal->>Reach in progress: 
-    Reach in progress->>Reach in progress: 
-    Reach in progress->>New Goal:  dist < WAYPOINT_ERROR
-    Reach in progress->>Last  position reached:  dist < DESTINATION_ERROR
-    Last  position reached->>Last  position reached:  
-    Last  position reached->>Last  pose reached:  angle < ANGLE_ERROR
+    loop for each waypoint
+      New Goal->>Reach in progress: 
+      Reach in progress->>Reach in progress: 
+      Reach in progress->>Last  position reached:  dist < WAYPOINT_EPS
+      Last  position reached->>Last  position reached: 
+      Last  position reached->>New Goal:  Another waypoint ? 
+    end
+    
+    Last  position reached->>Last  pose reached:  angle < goal angle
     Last  pose reached->>Last  pose reached : .
-
--->
-  
-Voici la machine d'état permettant de passer d'un waypoint à un autre :
-
-![img](img/state_machine.png) 
+    
+    
+```
  
 
 
