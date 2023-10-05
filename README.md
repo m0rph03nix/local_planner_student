@@ -103,11 +103,12 @@ sequenceDiagram
     loop for each waypoint
       New Goal->>Reach in progress: 
       Reach in progress->>Reach in progress: 
-      Reach in progress->>Last  position reached:  dist < WAYPOINT_EPS
-      Last  position reached->>Last  position reached: 
-      Last  position reached->>New Goal:  Another waypoint ? 
+
+      Reach in progress->>New Goal:  If another waypoint AND dist < WAYPOINT_EPS
     end
     
+    Reach in progress->>Last  position reached:  dist < DESTINATION_EPS
+    Last  position reached->>Last  position reached: 
     Last  position reached->>Last  pose reached:  angle < goal angle
     Last  pose reached->>Last  pose reached : .
     
