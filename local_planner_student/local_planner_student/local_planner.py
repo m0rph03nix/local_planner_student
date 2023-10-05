@@ -40,10 +40,9 @@ class LocalPlanner(Node):
                 - pathService for a full path
     """
 
-    pathPoses = []
-    currentTarget = Pose2D()
-    curPose2D = Pose2D()
-    isObstacle = False
+    pathPoses = []          # List of WayPoints. The current target is at index 0
+    curPose2D = Pose2D()    # Current pose (x, y theta) of the robot
+    isObstacle = False      # Boolean information of obstable
 
     def __init__(self):
         super().__init__('local_planner_node')
