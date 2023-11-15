@@ -135,7 +135,8 @@ Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la 
 
 > :x: ModuleNotFoundError: No module named 'tf_transformations'
 ```bash
-# Install this 
+# Install this
+sudo apt-get install python3-pip
 pip3 install transforms3d
 
 # Then...
