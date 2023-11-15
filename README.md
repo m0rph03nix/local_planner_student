@@ -29,7 +29,7 @@ graph LR
     Node -- /cmd_vel -->D[base controller]
 ```
 
-Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student)
+Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/dev_ros2). Dans la procédure vous remplacerez `<Your domain ID>` par votre numéro de binôme (cf numéro de groupe de votre repo git. e.g. S1_G**__2__**_...)
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
 + un Goal sur `goalService`
@@ -136,7 +136,7 @@ Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la 
 > :x: ModuleNotFoundError: No module named 'tf_transformations'
 ```bash
 # Install this
-sudo apt-get install python3-pip
+sudo apt-get install python3-pip # if needed
 pip3 install transforms3d
 
 # Then...
