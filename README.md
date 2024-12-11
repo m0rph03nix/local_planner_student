@@ -1,8 +1,14 @@
 
 # local_planner_student
 
+## Binômes
+
+Vous conserverez les mêmes goupes (monomes/binômes) dans tous les TPs de ce module, quelque soit l'intervenant.
+
+## Introduction au TP
+
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [local_planner.py](local_planner_student/local_planner_student/local_planner.py)
-Ce fichier NE FONCTIONNE DONC PAS EN L'ETAT. Il faut d'abord compléter toutes les balises `#TODO` après avoir lu tout ce README d'explication.    
+Ce fichier NE FONCTIONNE DONC PAS EN L'ETAT. Il faut d'abord compléter TOUTES les balises `#TODO` après avoir lu tout ce README d'explication.    
 
 Voici le schéma de principe du fonctionnement de ce "local planner" : 
 
@@ -29,7 +35,28 @@ graph LR
     Node -- /cmd_vel -->D[base controller]
 ```
 
-Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/dev_ros2). Dans la procédure vous remplacerez `<Your domain ID>` par votre numéro de binôme (cf numéro de groupe de votre repo git. e.g. S1_G**2**_... number is 2)
+## Installation et rendu
+
+Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement dans un container docker se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/ros2). 
+
+> Pour éviter un conflit avec les "autres ROS de la salle", faites bien 
+  soit       
+  `export ROS_LOCALHOST_ONLY=1` dans votre container pour cloisonner la communication ROS à votre conteneur docker, 
+  soit   
+  `export ROS_DOMAIN_ID=<your_domain_id>` dans votre container et votre machine pour authoriser la communication ROS dans un domaine défini. Vous remplacerez `<your_domain_id>` par votre numéro de binôme (cf numéro de groupe du repo GIT de rendu qui vous a été créé par le prof. e.g. S1_G**2**_... number is 2), afin qu'il n'y ait pas de conflits entre les groupes.
+
+
+Vous clonerez ce repo (`git clone https://github.com/m0rph03nix/local_planner_student.git`) dans le container dans `/home/tp/ros_ws/src` (à côté du TP `global_planner_short_path_student` si vous l'avez déjà fait)
+
+Pour chaque repo de sujet de TP (global_planner_short_path_student et local_planner_student) vous pourrez taper la commande suivante : 
+`git remote add rendu <lien https de votre repo GIT de rendu>`. 
+> :bulb: [Managing Remote Repositories](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories)
+
+Ainsi, vous pourrez pousser vos codes sur le repo GIT de rendu qui vous a été créé par le prof ( e.g `git push rendu nom_de_ma_branche`), tout en gardant le lien avec les repo des sujets (qui eux sont par défaut sur `origin` et non sur `rendu`). 
+
+
+
+## Développement
 
 Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants :
 + un Goal sur `goalService`
