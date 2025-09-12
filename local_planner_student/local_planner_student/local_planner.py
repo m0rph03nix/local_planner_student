@@ -351,7 +351,7 @@ class LocalPlanner(Node):
             twistStamped = TwistStamped()
             twistStamped.header.stamp = self.get_clock().now().to_msg()
             twistStamped.header.frame_id = self.cmd_frame_id
-            twistStamped.twist = twist  # copie directe du Twist calculé
+            twistStamped.twist = twist  
             self.velocity_pub.publish(twistStamped)
         else:
             self.velocity_pub.publish(twist)
