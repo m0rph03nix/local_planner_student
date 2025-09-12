@@ -180,9 +180,9 @@ class LocalPlanner(Node):
             transform = self.tf_buffer.lookup_transform("odom", request.path_to_goal.header.frame_id, self.get_clock().now(), rclpy.time.Duration(seconds = 10))
 
             for pose_stamp in request.path_to_goal.poses:
-                pose_stamp.pose = do_transform_pose(pose_stamp.pose, transform)
 
                 #TODO for students : Apply tranform on each Pose (of PoseStamped) with 'do_transform_pose' method out of tf.TransformListener()
+                # pose_stamp.pose = ...
 
                 self.pathPoses.append(pose_stamp)
 
