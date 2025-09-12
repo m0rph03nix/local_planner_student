@@ -1,11 +1,14 @@
-local_planner_node:
-  ros_parameters:
+local_planner:
+  ros__parameters:
     K_LINEAR: 1.0
     K_ANGULAR: 4.0
     SAT_LINEAR: 2.0
-    SAT_ANGULAR: 1.5708  # Valeur approximative de pi/2 en radians
+    SAT_ANGULAR: 1.5708
     OBSTACLE_RANGE: 0.5
     ANGLE_TO_ALLOW_LINEAR: 0.2
-    WAYPOINT_ERROR: 0.16
-    DESTINATION_ERROR: 0.003
-    ANGLE_ERROR: 0.2
+    WAYPOINT_EPS: 0.16
+    DESTINATION_EPS: 0.003
+    ANGLE_EPS: 0.2
+    # Paramètres pour le message cmd_vel
+    cmd_vel_msg: "auto"  # Options: 'auto', 'twist', 'twist_stamped'
+    cmd_vel_frame_id: "base_link"

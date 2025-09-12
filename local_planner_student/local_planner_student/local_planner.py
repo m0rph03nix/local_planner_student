@@ -2,12 +2,13 @@
 
 __author__ = 'Raphael LEBER'
 
+import os
 import rclpy
 from rclpy.node import Node
 import tf2_ros
 from tf2_ros import Buffer
 from tf2_geometry_msgs import do_transform_pose
-from geometry_msgs.msg import Twist, Point, PoseStamped, Pose2D
+from geometry_msgs.msg import Twist, TwistStamped, Point, PoseStamped, Pose2D
 from nav_msgs.msg import Path, Odometry
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
@@ -45,45 +46,54 @@ class LocalPlanner(Node):
     isObstacle = False      # Boolean information of obstable
 
     def __init__(self):
-        super().__init__('local_planner_node')
+        super().__init__('local_planner', automatically_declare_parameters_from_overrides=True)
+
         # init params
        
 
-        # Retrieve parameters with default values
-        self.declare_parameters(
-            namespace='',
-            parameters=[
-                ('K_LINEAR', 1.0),
-                ('K_ANGULAR', 4.0),
-                ('SAT_LINEAR', 2.0),
-                ('SAT_ANGULAR', (3.14159265359 / 2.0)),
-                ('OBSTACLE_RANGE', 0.),
-                ('ANGLE_TO_ALLOW_LINEAR', 0.2),
-                ('WAYPOINT_EPS', 0.16),
-                ('DESTINATION_EPS', 0.003),
-                ('ANGLE_EPS', 0.2)
-            ]
-        )
-
         # Proportionnal coefficient for linear velocity
-        self.K_linear = self.get_parameter('K_LINEAR').get_parameter_value().double_value or 1.0
+        self.K_linear = self._param('K_LINEAR', 1.0)
         # Proportionnal coefficient for angular velocity
-        self.K_angular = self.get_parameter('K_ANGULAR').get_parameter_value().double_value or 4.0
+        self.K_angular = self._param('K_ANGULAR', 4.0)
         # Max linear velocity
-        self.Sat_linear = self.get_parameter('SAT_LINEAR').get_parameter_value().double_value or 2.0
+        self.Sat_linear = self._param('SAT_LINEAR', 2.0)                        
         # Max angular velocity
-        self.Sat_angular = self.get_parameter('SAT_ANGULAR').get_parameter_value().double_value or (3.14159265359 / 2.0)  # Approximation of pi
+        self.Sat_angular = self._param('SAT_ANGULAR', 1.5708)
         # Distance below which we consider an obstacle
-        self.Obstacle_range = self.get_parameter('OBSTACLE_RANGE').get_parameter_value().double_value or 0.5
+        self.Obstacle_range = self._param('OBSTACLE_RANGE', 0.5)
         # Above this value: angular control only. Below this value: angular and linear control together
-        self.Angle_to_allow_linear = self.get_parameter('ANGLE_TO_ALLOW_LINEAR').get_parameter_value().double_value or 0.2
+        self.Angle_to_allow_linear = self._param('ANGLE_TO_ALLOW_LINEAR', 0.2)
         # Euclidian distance error to a waypoint allowing to move to a new waypoint
-        self.Waypoint_eps = self.get_parameter('WAYPOINT_EPS').get_parameter_value().double_value or 0.16
+        self.Waypoint_eps = self._param('WAYPOINT_EPS', 0.16)
         # Euclidian distance error to the final waypoint below which we consider the position reached
-        self.Destination_eps = self.get_parameter('DESTINATION_EPS').get_parameter_value().double_value or 0.003
+        self.Destination_eps = self._param('DESTINATION_EPS', 0.003)
         # Angular error below which we consider the final orientation reached
-        self.Angle_eps = self.get_parameter('ANGLE_EPS').get_parameter_value().double_value or 0.2
-       
+        self.Angle_eps = self._param('ANGLE_EPS', 0.2)
+
+        # Frame_id to use in the cmd_vel message
+        self.cmd_frame_id = self._param('cmd_vel_frame_id', 'base_link')
+        # Mode for cmd_vel message: 'auto' (default) / 'twist' / 'twist_stamped'
+        self.cmd_mode = self._param('cmd_vel_msg', 'auto')        
+
+
+
+        # ------------------  Selection Twist vs TwistStamped  ------------------
+        
+        ros_distro = (os.getenv('ROS_DISTRO') or '').lower()
+        # À partir de Jazzy (et Rolling), on choisit TwistStamped en auto
+        auto_use_stamped = ros_distro in ('jazzy', 'rolling')
+
+        if self.cmd_mode == 'twist':
+            self.use_stamped_cmd = False
+        elif self.cmd_mode == 'twist_stamped':
+            self.use_stamped_cmd = True
+        else:
+            self.use_stamped_cmd = auto_use_stamped
+ 
+
+        self.get_logger().info(f"cmd_vel_msg={self.cmd_mode} ({type(self.cmd_mode)})")
+        self.get_logger().info(f"cmd_vel_frame_id={self.cmd_frame_id} ({type(self.cmd_frame_id)})")
+        self.get_logger().info(f"use_stamped_cmd={self.use_stamped_cmd} ({type(self.use_stamped_cmd)})")
 
         # tf2_ros transform listener
         self.tf_buffer = tf2_ros.Buffer()
@@ -113,6 +123,12 @@ class LocalPlanner(Node):
         # LOCAL PLANNING
         timer_period = 0.05  # 20Hz
         self.create_timer(timer_period, self.local_planning)
+
+
+    def _param(self, name, default):
+        if not self.has_parameter(name):
+            self.declare_parameter(name, default)
+        return self.get_parameter(name).value          
 
     #******************************************************************************************
     #*********************************   SUBSCRIBERS CALLBACK   ********************************
@@ -228,7 +244,8 @@ class LocalPlanner(Node):
             
             
             #TODO for students : calculate distCurTarget and angle. To compute shortest angle use method shortestAngleDiff defined before
-
+            distCurTarget = 0.0 # To be changed
+            angle = 0.0 # To be changed
 
             return (distCurTarget, angle)
         else:
@@ -243,7 +260,7 @@ class LocalPlanner(Node):
 
 
             #TODO for students : calculate angle . To compute shortest angle use method shortestAngleDiff defined before
-
+            angle = 0.0 # To be changed
 
 
             return angle       
@@ -286,7 +303,7 @@ class LocalPlanner(Node):
         """
         twist = Twist()
 
-        twist.angular.z = 0 #TODO for students : Change 0 with gain and saturation (both ROSPARAM) applied to angle (as already done for linear velocity)
+        twist.angular.z = 0.0 #TODO for students : Change 0.0 with gain and saturation (both ROSPARAM) applied to angle (as already done for linear velocity)
 
         if fabs(angle) < self.Angle_to_allow_linear:
             if goalState == "" or goalState == "":  #TODO for students : modify string matching with the state (help in pathSequencer docstring)  
@@ -329,16 +346,29 @@ class LocalPlanner(Node):
             angle = finalOrientation
 
         twist = self.compute_velocity(dist, angle, goalState)
-        self.velocity_pub.publish(twist)
+
+        if self.use_stamped_cmd:
+            twistStamped = TwistStamped()
+            twistStamped.header.stamp = self.get_clock().now().to_msg()
+            twistStamped.header.frame_id = self.cmd_frame_id
+            twistStamped.twist = twist  # copie directe du Twist calculé
+            self.velocity_pub.publish(twistStamped)
+        else:
+            self.velocity_pub.publish(twist)
 
 
 
 def main(args=None):
     rclpy.init(args=args)
     local_planner = LocalPlanner()
-    rclpy.spin(local_planner)
-    local_planner.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(local_planner)
+    except KeyboardInterrupt:
+        local_planner.get_logger().info("Arrêt demandé par l’utilisateur (Ctrl+C)")
+    finally:
+        local_planner.destroy_node()
+        rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
