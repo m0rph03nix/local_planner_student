@@ -8,7 +8,7 @@ Vous conserverez les mêmes goupes (monomes/binômes) dans tous les TPs de ce mo
 ## Introduction au TP
 
 Le but de ce TP est de coder un "local planner" sur la base du template fourni : [local_planner.py](local_planner_student/local_planner_student/local_planner.py)
-Ce fichier NE FONCTIONNE DONC PAS EN L'ETAT. Il faut d'abord compléter TOUTES les balises `#TODO` après avoir lu tout ce README d'explication.    
+Ce fichier se lance en l'état MAIS NE FONCTIONNE DONC PAS EN L'ETAT. Il faut d'abord compléter TOUTES les balises `#TODO` après avoir lu tout ce README d'explication.    
 
 Voici le schéma de principe du fonctionnement de ce "local planner" : 
 
@@ -37,16 +37,17 @@ graph LR
 
 ## Installation et rendu
 
-Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Nous utiliserons le robot turtlebot dans le simulateur stage. La procédure de lancement dans un container docker se trouve dans [la partie du TP gérée par Jacques Saraydaryan](https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/ros2). 
+Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Il y a 2 possibilités. Les instructions se trouvent dans la partie du TP géré par Jacques Saraydaryan : https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/dev_ros2_jazzy
+
 
 > Pour éviter un conflit avec les "autres ROS de la salle", faites bien 
   soit       
-  `export ROS_LOCALHOST_ONLY=1` dans votre container pour cloisonner la communication ROS à votre conteneur docker, 
+  `export ROS_LOCALHOST_ONLY=1` dans pour cloisonner la communication ROS à votre machine/container
   soit   
-  `export ROS_DOMAIN_ID=<your_domain_id>` dans votre container et votre machine pour authoriser la communication ROS dans un domaine défini. Vous remplacerez `<your_domain_id>` par votre numéro de binôme (cf numéro de groupe du repo GIT de rendu qui vous a été créé par le prof. e.g. S1_G**2**_... number is 2), afin qu'il n'y ait pas de conflits entre les groupes.
+  `export ROS_DOMAIN_ID=<your_domain_id>` dans votre container et votre machine pour authoriser la communication ROS dans un domaine défini. Vous remplacerez `<your_domain_id>` par votre numéro de binôme (cf numéro de groupe du repo GIT de rendu qui vous a été créé par le prof. e.g. `S1_G**2**_...` ou `Groupe-**2**` alors mettez `2`), afin qu'il n'y ait pas de conflits entre les groupes.
 
 
-Vous clonerez ce repo (`git clone https://github.com/m0rph03nix/local_planner_student.git`) dans le container dans `/home/tp/ros_ws/src` (à côté du TP `global_planner_short_path_student` si vous l'avez déjà fait)
+Vous clonerez ce repo (`git clone https://github.com/m0rph03nix/local_planner_student.git`) à côté du TP `global_planner_short_path_student` si vous l'avez déjà fait.
 
 Pour chaque repo de sujet de TP (global_planner_short_path_student et local_planner_student) vous pourrez taper la commande suivante : 
 `git remote add rendu <lien https de votre repo GIT de rendu>`. 
@@ -54,6 +55,22 @@ Pour chaque repo de sujet de TP (global_planner_short_path_student et local_plan
 
 Ainsi, vous pourrez pousser vos codes sur le repo GIT de rendu qui vous a été créé par le prof ( e.g `git push rendu nom_de_ma_branche`), tout en gardant le lien avec les repo des sujets (qui eux sont par défaut sur `origin` et non sur `rendu`). 
 
+## Lancement des codes
+
+### Local Planner
+  ```bash
+  ros2 run local_planner_student local_planner # Valeurs par défaut dans code python
+  ```
+ou
+  ```bash
+  ros2 launch local_planner_student local_planner_launch.py # Valeurs par défaut dans config/config.yaml
+  ```
+
+### Client au service pathService qui publie des waypoints pour une trajectoire de test
+
+  ```bash
+  ros2 run local_planner_student test_path_generator
+  ```
 
 
 ## Développement
@@ -78,7 +95,7 @@ Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants 
       ```{r, engine='bash', count_lines} 
       ros2 run local_planner_student testPathGenerator
       ```
-      Le code source du générateur se trouve dans le fichier [testPathGenerator.py](local_planner_raph/local_planner_raph/testPathGenerator.py)
+      Le code source du générateur se trouve dans le fichier [testPathGenerator.py](local_planner_student/local_planner_student/testPathGenerator.py)
   - La consigne `path_to_goal` est exprimée en absolue dans n'importe quel repère à définir dans `header.frame_id` . Dans le cas du générateur, le `frame_id` envoyé est celui de la `/map`. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode `do_transform_pose` avec la transformation issue de la methode `lookup_transform`.
 
 Pour évaluer le déplacement et l'environnement proche, votre noeud doit s'abonner aux 2 topics suivants :
@@ -96,23 +113,23 @@ Plus globalement, prenez en compte chacun des ROSPARAM passés au contructeur de
 
 ```python
         # Proportionnal coefficient for linear velocity
-        self.K_linear = self.get_parameter('K_LINEAR').get_parameter_value().double_value or 1.0
+        self.K_linear = self._param('K_LINEAR', 1.0)
         # Proportionnal coefficient for angular velocity
-        self.K_angular = self.get_parameter('K_ANGULAR').get_parameter_value().double_value or 4.0
+        self.K_angular = self._param('K_ANGULAR', 4.0)
         # Max linear velocity
-        self.Sat_linear = self.get_parameter('SAT_LINEAR').get_parameter_value().double_value or 2.0
+        self.Sat_linear = self._param('SAT_LINEAR', 2.0)                        
         # Max angular velocity
-        self.Sat_angular = self.get_parameter('SAT_ANGULAR').get_parameter_value().double_value or (3.14159265359 / 2.0)  # Approximation of pi
+        self.Sat_angular = self._param('SAT_ANGULAR', 1.5708)
         # Distance below which we consider an obstacle
-        self.Obstacle_range = self.get_parameter('OBSTACLE_RANGE').get_parameter_value().double_value or 0.5
+        self.Obstacle_range = self._param('OBSTACLE_RANGE', 0.5)
         # Above this value: angular control only. Below this value: angular and linear control together
-        self.Angle_to_allow_linear = self.get_parameter('ANGLE_TO_ALLOW_LINEAR').get_parameter_value().double_value or 0.2
+        self.Angle_to_allow_linear = self._param('ANGLE_TO_ALLOW_LINEAR', 0.2)
         # Euclidian distance error to a waypoint allowing to move to a new waypoint
-        self.Waypoint_eps = self.get_parameter('WAYPOINT_EPS').get_parameter_value().double_value or 0.16
+        self.Waypoint_eps = self._param('WAYPOINT_EPS', 0.16)
         # Euclidian distance error to the final waypoint below which we consider the position reached
-        self.Destination_eps = self.get_parameter('DESTINATION_EPS').get_parameter_value().double_value or 0.003
+        self.Destination_eps = self._param('DESTINATION_EPS', 0.003)
         # Angular error below which we consider the final orientation reached
-        self.Angle_eps = self.get_parameter('ANGLE_EPS').get_parameter_value().double_value or 0.2
+        self.Angle_eps = self._param('ANGLE_EPS', 0.2)
 ```  
   
 
