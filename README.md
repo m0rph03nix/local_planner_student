@@ -1,7 +1,7 @@
 
 # local_planner_student
 
-## Binômes
+## Binômes  
 
 Vous conserverez les mêmes goupes (monomes/binômes) dans tous les TPs de ce module, quelque soit l'intervenant.
 
@@ -159,9 +159,11 @@ sequenceDiagram
     
 ```
  
+ ## Méthodologie
 
 
 Imprégnez-vous de la structure du code. Complétez le template. Des commentaires `#TODO` indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code (pas recommandé dans le temps imparti).
+
 Commencez par les `#TODO` des callbacks de topics. Continuez par tous les autres `#TODO`. Celui de la méthode `path_service_callback` peut se faire éventuellement dans un second temps.
 
 En effet, avant de tester le service associé à `path_service_callback` (`/pathService`), il faudra d'abord tester le service associé à `goal_service_callback` (`/goalService`), qui est nettement plus simple (un goal, plutôt qu'une liste de waypoints).
@@ -186,7 +188,7 @@ pip3 install transforms3d
 # Then...
 
 # if you are root do this :
-sudo apt-get install ros-humble-tf-transformations
+sudo apt-get install ros-${ROS_DISTRO}-tf-transformations
 
 # if you are not root, clone and build the sources in your workspace src folder :
 git clone git@github.com:DLu/tf_transformations.git
