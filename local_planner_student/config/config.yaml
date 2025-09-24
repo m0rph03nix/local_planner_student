@@ -10,5 +10,5 @@ local_planner:
     DESTINATION_EPS: 0.003
     ANGLE_EPS: 0.2
     # Paramètres pour le message cmd_vel
-    cmd_vel_msg: "auto"  # Options: 'auto', 'twist', 'twist_stamped'
+    cmd_vel_msg: "twist"  # Options: 'auto', 'twist', 'twist_stamped'
     cmd_vel_frame_id: "base_link"

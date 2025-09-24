@@ -73,7 +73,7 @@ class LocalPlanner(Node):
         # Frame_id to use in the cmd_vel message
         self.cmd_frame_id = self._param('cmd_vel_frame_id', 'base_link')
         # Mode for cmd_vel message: 'auto' (default) / 'twist' / 'twist_stamped'
-        self.cmd_mode = self._param('cmd_vel_msg', 'auto')        
+        self.cmd_mode = self._param('cmd_vel_msg', 'twist')        
 
 
 
