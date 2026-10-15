@@ -37,23 +37,24 @@ graph LR
 
 ## Installation et rendu
 
-Le turtelbot est tout trouvé pour cet usage. L'utilisation d'un simulateur facilitera la réalisation du TP. Il y a 2 possibilités. Les instructions se trouvent dans la partie du TP géré par Jacques Saraydaryan : https://github.com/jacques-saraydaryan/global_planner_short_path_student/tree/dev_ros2_jazzy
+> :warning: **Ne clonez pas ce repo.** Suivez le guide **[SETUP_TP.md](https://gitlab.com/cpelyon/rob_ressources/ros2_cuda_gazebo.docker/-/blob/main/SETUP_TP.md)**, étapes 0 à 4, dans l'ordre. Il est commun à tous les TPs de navigation : si vous l'avez déjà suivi pour un autre TP, faites seulement l'ajout de ce sujet (étape 2, `git subtree add` avec `tp_local`).
 
+**Lancez toujours le conteneur avec `./run_tp.sh`, depuis la racine de votre workspace** (guide, étape 3) : le script vérifie votre installation avant de démarrer.
+- Corrigez tout point rouge ✖ avant de continuer.
+- Pour ce TP, `local_planner_student` et `global_planner_short_path_student` doivent être en vert ✔.
 
-> Pour éviter un conflit avec les "autres ROS de la salle", faites bien 
-  soit       
-  `export ROS_LOCALHOST_ONLY=1` dans pour cloisonner la communication ROS à votre machine/container
-  soit   
-  `export ROS_DOMAIN_ID=<your_domain_id>` dans votre container et votre machine pour authoriser la communication ROS dans un domaine défini. Vous remplacerez `<your_domain_id>` par votre numéro de binôme (cf numéro de groupe du repo GIT de rendu qui vous a été créé par le prof. e.g. `S1_G**2**_...` ou `Groupe-**2**` alors mettez `2`), afin qu'il n'y ait pas de conflits entre les groupes.
+Le rendu se fait en poussant sur votre repo de rendu (guide, étape 5).
 
+### Simulateur
 
-Vous clonerez ce repo (`git clone https://github.com/m0rph03nix/local_planner_student.git`) à côté du TP `global_planner_short_path_student` si vous l'avez déjà fait.
+Dans le conteneur :
 
-Pour chaque repo de sujet de TP (global_planner_short_path_student et local_planner_student) vous pourrez taper la commande suivante : 
-`git remote add rendu <lien https de votre repo GIT de rendu>`. 
-> :bulb: [Managing Remote Repositories](https://docs.github.com/en/get-started/getting-started-with-git/managing-remote-repositories)
+```bash
+export TRAINING_GLOBAL=/root/student_ws/src/global_planner_short_path_student
+ros2 launch nav2_bringup tb4_simulation_launch.py headless:=False world:=$TRAINING_GLOBAL/world/baseline.world x_pose:=1.0 y_pose:=1.0 z_pose:=0 map:=$TRAINING_GLOBAL/map/baseline.yaml
+```
 
-Ainsi, vous pourrez pousser vos codes sur le repo GIT de rendu qui vous a été créé par le prof ( e.g `git push rendu nom_de_ma_branche`), tout en gardant le lien avec les repo des sujets (qui eux sont par défaut sur `origin` et non sur `rendu`). 
+Dans rviz, positionnez le robot avec **2D Pose Estimate** (nécessaire pour `/pathService`, qui utilise la TF `map`).
 
 ## Lancement des codes
 
@@ -93,7 +94,7 @@ Pour piloter le robot, votre noeud doit pouvoir traiter les 2 services suivants 
   - Ce service reçoit un message `path_to_goal` de type `nav_msgs/Path` et répond le message `success` de type `std_msgs/Bool` renseignant le succès ou l'échec de prise en compte de la liste de waypoints (ne garantis pas qu'elle sera bien effectuée sans obstacles) Les messages du service sont dans le fichier [PathToGoal.srv](local_planner_srvs/srv/PathToGoal.srv) dans le paquet local_planner_srvs.
   - Le message étant long et difficile à écrire en console, utilisez le noeud path_generator fourni avec le template. 
       ```{r, engine='bash', count_lines} 
-      ros2 run local_planner_student testPathGenerator
+      ros2 run local_planner_student test_path_generator
       ```
       Le code source du générateur se trouve dans le fichier [testPathGenerator.py](local_planner_student/local_planner_student/testPathGenerator.py)
   - La consigne `path_to_goal` est exprimée en absolue dans n'importe quel repère à définir dans `header.frame_id` . Dans le cas du générateur, le `frame_id` envoyé est celui de la `/map`. **Attention** : A sa reception, la pose devra être convertie dans le repère de la TF odom. Cela peut se faire en une ligne avec la méthode `do_transform_pose` avec la transformation issue de la methode `lookup_transform`.
@@ -174,27 +175,6 @@ Lorque le progrmamme fonctionne bien avec le service `/goalService`, ajoutez la 
 
 
 # FAQ
-
-## Errors
-
-### tf_transforms
-
-> :x: ModuleNotFoundError: No module named 'tf_transformations'
-```bash
-# Install this
-sudo apt-get install python3-pip # if needed
-pip3 install transforms3d
-
-# Then...
-
-# if you are root do this :
-sudo apt-get install ros-${ROS_DISTRO}-tf-transformations
-
-# if you are not root, clone and build the sources in your workspace src folder :
-git clone git@github.com:DLu/tf_transformations.git
-```
-
-
 
 ## Commands
 
