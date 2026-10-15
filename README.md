@@ -47,14 +47,20 @@ Le rendu se fait en poussant sur votre repo de rendu (guide, étape 5).
 
 ### Simulateur
 
-Dans le conteneur :
+Dans le conteneur, cette commande ouvre Gazebo **et RViz** (déjà configuré pour Nav2) :
 
 ```bash
 export TRAINING_GLOBAL=/root/student_ws/src/global_planner_short_path_student
 ros2 launch nav2_bringup tb4_simulation_launch.py headless:=False world:=$TRAINING_GLOBAL/world/baseline.world x_pose:=1.0 y_pose:=1.0 z_pose:=0 map:=$TRAINING_GLOBAL/map/baseline.yaml
 ```
 
-Dans rviz, positionnez le robot avec **2D Pose Estimate** (nécessaire pour `/pathService`, qui utilise la TF `map`).
+Puis, dans un autre terminal (`./run_tp.sh`), initialisez la position du robot sur la carte (nécessaire pour `/pathService`, qui utilise la TF `map`) :
+
+```bash
+ros2 topic pub --once /initialpose geometry_msgs/msg/PoseWithCovarianceStamped "{header: {frame_id: map}, pose: {pose: {position: {x: 1.0, y: 1.0}, orientation: {w: 1.0}}}}"
+```
+
+(ou, dans RViz, outil **2D Pose Estimate** : cliquez sur la position du robot et orientez la flèche vers l'avant du robot.)
 
 ## Lancement des codes
 
