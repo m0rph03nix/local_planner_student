@@ -45,9 +45,19 @@ graph LR
 
 Le rendu se fait en poussant sur votre repo de rendu (guide, étape 5).
 
+### Compilation
+
+Dans le conteneur :
+
+```bash
+cd /root/student_ws
+colcon build --symlink-install
+source install/setup.bash
+```
+
 ### Simulateur
 
-Dans le conteneur, cette commande ouvre Gazebo **et RViz** (déjà configuré pour Nav2) :
+Dans le conteneur, cette commande ouvre Gazebo et RViz (déjà configuré pour Nav2) :
 
 ```bash
 export TRAINING_GLOBAL=/root/student_ws/src/global_planner_short_path_student
@@ -166,7 +176,7 @@ sequenceDiagram
     
 ```
  
- ## Méthodologie
+## Méthodologie de travail pour ce TP
 
 
 Imprégnez-vous de la structure du code. Complétez le template. Des commentaires `#TODO` indique dans les grandes lignes ce qu'il faut faire. Il est possible également de refaire tout le code (pas recommandé dans le temps imparti).
